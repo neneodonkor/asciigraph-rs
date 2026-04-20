@@ -49,25 +49,25 @@ pub fn create_char_set(character: char) -> CharSet {
 }
 
 // Config holds various graph options
-struct Config {
-    width: u32,
-    height: u32,
-    lower_bound: Option<f64>,
-    upper_bound: Option<f64>,
-    offset: u32,
-    caption: String,
-    precision: Option<u32>,
-    caption_color: AnsiColor,
-    axis_color: AnsiColor,
-    label_color: AnsiColor,
-    series_colors: Vec<AnsiColor>,
-    series_legends: Vec<String>,
-    line_ending: String,
-    series_chars: Vec<CharSet>,
-    x_axis_tick_count: u32,
-    x_axis_range: Option<[f64; 2]>,
-    x_axis_value_formatter: Option<Box<dyn Fn(f64) -> String>>,
-    y_axis_value_formatter: Option<Box<dyn Fn(f64) -> String>>,
+pub(crate) struct Config {
+    pub(crate) width: u32,
+    pub(crate) height: u32,
+    pub(crate) lower_bound: Option<f64>,
+    pub(crate) upper_bound: Option<f64>,
+    pub(crate) offset: u32,
+    pub(crate) caption: String,
+    pub(crate) precision: Option<u32>,
+    pub(crate) caption_color: AnsiColor,
+    pub(crate) axis_color: AnsiColor,
+    pub(crate) label_color: AnsiColor,
+    pub(crate) series_colors: Vec<AnsiColor>,
+    pub(crate) series_legends: Vec<String>,
+    pub(crate) line_ending: String,
+    pub(crate) series_chars: Vec<CharSet>,
+    pub(crate) x_axis_tick_count: u32,
+    pub(crate) x_axis_range: Option<[f64; 2]>,
+    pub(crate) x_axis_value_formatter: Option<Box<dyn Fn(f64) -> String>>,
+    pub(crate) y_axis_value_formatter: Option<Box<dyn Fn(f64) -> String>>,
 }
 
 impl Default for Config {
