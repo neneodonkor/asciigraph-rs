@@ -1,14 +1,13 @@
-pub fn add(l: u64, r: u64) -> u64 {
-    l + r
-}
+// pub mod asciigraph;
+// pub mod options;
+// pub mod color;
+// pub mod legend;
+// pub mod utils;
+//
+// pub use asciigraph::{plot, plot_many};
+// pub use options::Options;
+// pub use color::Color;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+pub mod color;
+pub mod options;
+pub mod utils;
