@@ -476,11 +476,7 @@ fn add_x_axis(lines: &mut String, config: &Config, len_max: usize, left_pad: usi
         for i in 0..ticks.len() {
             let label = default_x_axis_formatter(ticks[i].value);
             let label_len = label.chars().count();
-            let mut start_col = left_pad + ticks[i].col - (label_len / 2);
-
-            if start_col < 0 {
-                start_col = 0;
-            }
+            let start_col = left_pad + ticks[i].col - (label_len / 2);
 
             if start_col as isize > last_end {
                 if ticks[i].value != ticks[i].value.floor() {
