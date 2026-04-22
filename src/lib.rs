@@ -6,6 +6,6 @@ pub mod utils;
 pub mod legend;
 pub mod asciigraph;
 
-pub use color::AnsiColor;
-pub use options::{CharSet, Config};
-pub use asciigraph::{plot, plot_many};
+pub use crate::color::AnsiColor;
+pub use crate::options::{CharSet, Config, DEFAULT_CHAR_SET, create_char_set};
+pub use crate::asciigraph::{plot, plot_many};

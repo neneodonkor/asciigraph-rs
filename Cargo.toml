@@ -1,6 +1,13 @@
 [package]
-name = "asciigraph-rs"
+name = "asciigraph"
 version = "0.1.0"
 edition = "2024"
+description = "A Rust port of the Go asciigraph library for lightweight ASCII line graphs in the terminal"
+license = "BSD-3-Clause"
+authors = ["Nene Odonkor <niinue@gmail.com>"]
+repository = "https://github.com/neneodonkor/asciigraph-rs"
+readme = "README.md"
+keywords = ["ascii", "graph", "plot", "terminal", "cli"]
+categories = ["command-line-utilities", "visualization"]
 
 [dependencies]

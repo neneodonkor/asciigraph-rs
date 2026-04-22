@@ -4,41 +4,41 @@ use std::string::ToString;
 use crate::color::AnsiColor;
 
 // CharSet defines the characters used for plotting a series.
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct CharSet {
     /// Horizontal line character (default: ─)
-    pub(crate) horizontal: &'static str,
+    pub horizontal: &'static str,
 
     /// Vertical line character (default: │)
-    pub(crate) vertical_line: &'static str,
+    pub vertical_line: &'static str,
 
     /// Arc character going down and right (default: ╭)
-    pub(crate) arc_down_right: &'static str,
+    pub arc_down_right: &'static str,
 
     /// Arc character going down and left (default: ╮)
-    pub(crate) arc_down_left: &'static str,
+    pub arc_down_left: &'static str,
 
     /// Arc character going up and right (default: ╰)
-    pub(crate) arc_up_right: &'static str,
+    pub arc_up_right: &'static str,
 
     /// Arc character going up and left (default: ╯)
-    pub(crate) arc_up_left: &'static str,
+    pub arc_up_left: &'static str,
 
     /// End cap character (default: ╴)
-    pub(crate) end_cap: &'static str,
+    pub end_cap: &'static str,
 
     /// Start cap character (default: ╶)
-    pub(crate) start_cap: &'static str,
+    pub start_cap: &'static str,
 
     /// Axis corner character (default: └)
-    pub(crate) up_right: &'static str,
+    pub up_right: &'static str,
 
     /// X-axis tick mark character (default: ┬)
-    pub(crate) down_horizontal: &'static str,
+    pub down_horizontal: &'static str,
 }
 
 // DEFAULT_CHAR_SET provides the default box-drawing characters.
-pub(crate) const DEFAULT_CHAR_SET: CharSet = CharSet {
+pub const DEFAULT_CHAR_SET: CharSet = CharSet {
     horizontal:      "─",
     vertical_line:   "│",
     arc_down_right:  "╭",
@@ -53,7 +53,7 @@ pub(crate) const DEFAULT_CHAR_SET: CharSet = CharSet {
 
 // create_char_set is a helper function that creates a CharSet with all fields set to the same character.
 // This is useful for simple uniform character sets like "*", "•", "#", etc.
-pub(crate) fn create_char_set(character: &'static str) -> CharSet {
+pub fn create_char_set(character: &'static str) -> CharSet {
     CharSet {
         horizontal: character,
         vertical_line: character,
@@ -70,24 +70,24 @@ pub(crate) fn create_char_set(character: &'static str) -> CharSet {
 
 // Config holds various graph options
 pub struct Config {
-    pub(crate) width: usize,
-    pub(crate) height: usize,
-    pub(crate) lower_bound: Option<f64>,
-    pub(crate) upper_bound: Option<f64>,
-    pub(crate) offset: usize,
-    pub(crate) caption: String,
-    pub(crate) precision: Option<usize>,
-    pub(crate) caption_color: AnsiColor,
-    pub(crate) axis_color: AnsiColor,
-    pub(crate) label_color: AnsiColor,
-    pub(crate) series_colors: Vec<AnsiColor>,
-    pub(crate) series_legends: Vec<String>,
-    pub(crate) line_ending: String,
-    pub(crate) series_chars: Vec<CharSet>,
-    pub(crate) x_axis_tick_count: usize,
-    pub(crate) x_axis_range: Option<[f64; 2]>,
-    pub(crate) x_axis_value_formatter: Option<Box<dyn Fn(f64) -> String>>,
-    pub(crate) y_axis_value_formatter: Option<Box<dyn Fn(f64) -> String>>,
+    pub width: usize,
+    pub height: usize,
+    pub lower_bound: Option<f64>,
+    pub upper_bound: Option<f64>,
+    pub offset: usize,
+    pub caption: String,
+    pub precision: Option<usize>,
+    pub caption_color: AnsiColor,
+    pub axis_color: AnsiColor,
+    pub label_color: AnsiColor,
+    pub series_colors: Vec<AnsiColor>,
+    pub series_legends: Vec<String>,
+    pub line_ending: String,
+    pub series_chars: Vec<CharSet>,
+    pub x_axis_tick_count: usize,
+    pub x_axis_range: Option<[f64; 2]>,
+    pub x_axis_value_formatter: Option<Box<dyn Fn(f64) -> String>>,
+    pub y_axis_value_formatter: Option<Box<dyn Fn(f64) -> String>>,
 }
 
 impl Default for Config {
@@ -183,7 +183,7 @@ impl Config {
     }
 
     /// series_color sets the series colors.
-    pub fn series_color(mut self, colors: &[AnsiColor]) -> Self {
+    pub fn series_colors(mut self, colors: &[AnsiColor]) -> Self {
         self.series_colors = colors.to_vec();
         self
     }
