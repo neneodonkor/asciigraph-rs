@@ -8,4 +8,4 @@ pub mod asciigraph;
 
 pub use color::AnsiColor;
 pub use options::{CharSet, Config};
-// pub use asciigraph::{plot, plot_many};
+pub use asciigraph::{plot, plot_many};
