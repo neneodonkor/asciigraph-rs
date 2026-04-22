@@ -340,3 +340,4 @@ impl fmt::Display for AnsiColor {
         }
     }
 }
+
