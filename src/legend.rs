@@ -23,7 +23,7 @@ pub(crate) fn add_legends(lines: &mut String, config: &Config, len_max: usize, l
     let right_pad: usize = 3;
 
     for (i, text) in config.series_legends.iter().enumerate() {
-        /// Use default color if series_colors is not set or index is out of range
+        // Use default color if series_colors is not set or index is out of range
         let mut color = AnsiColor::DEFAULT;
         if i < config.series_colors.len() {
             color = config.series_colors[i];

@@ -7,53 +7,53 @@ use crate::color::AnsiColor;
 #[derive(Debug, Default, Clone)]
 pub struct CharSet {
     /// Horizontal line character (default: ─)
-    pub horizontal: &'static str,
+    pub horizontal: char,
 
     /// Vertical line character (default: │)
-    pub vertical_line: &'static str,
+    pub vertical_line: char,
 
     /// Arc character going down and right (default: ╭)
-    pub arc_down_right: &'static str,
+    pub arc_down_right: char,
 
     /// Arc character going down and left (default: ╮)
-    pub arc_down_left: &'static str,
+    pub arc_down_left: char,
 
     /// Arc character going up and right (default: ╰)
-    pub arc_up_right: &'static str,
+    pub arc_up_right: char,
 
     /// Arc character going up and left (default: ╯)
-    pub arc_up_left: &'static str,
+    pub arc_up_left: char,
 
     /// End cap character (default: ╴)
-    pub end_cap: &'static str,
+    pub end_cap: char,
 
     /// Start cap character (default: ╶)
-    pub start_cap: &'static str,
+    pub start_cap: char,
 
     /// Axis corner character (default: └)
-    pub up_right: &'static str,
+    pub up_right: char,
 
     /// X-axis tick mark character (default: ┬)
-    pub down_horizontal: &'static str,
+    pub down_horizontal: char,
 }
 
 // DEFAULT_CHAR_SET provides the default box-drawing characters.
 pub const DEFAULT_CHAR_SET: CharSet = CharSet {
-    horizontal:      "─",
-    vertical_line:   "│",
-    arc_down_right: "╭",
-    arc_down_left:  "╮",
-    arc_up_right:   "╰",
-    arc_up_left:    "╯",
-    end_cap:         "╴",
-    start_cap:       "╶",
-    up_right:        "└",
-    down_horizontal: "┬",
+    horizontal:      '─',
+    vertical_line:   '│',
+    arc_down_right:  '╭',
+    arc_down_left:   '╮',
+    arc_up_right:    '╰',
+    arc_up_left:     '╯',
+    end_cap:         '╴',
+    start_cap:       '╶',
+    up_right:        '└',
+    down_horizontal: '┬',
 };
 
 // create_char_set is a helper function that creates a CharSet with all fields set to the same character.
 // This is useful for simple uniform character sets like "*", "•", "#", etc.
-pub fn create_char_set(character: &'static str) -> CharSet {
+pub fn create_char_set(character: char) -> CharSet {
     CharSet {
         horizontal: character,
         vertical_line: character,
