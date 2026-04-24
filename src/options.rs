@@ -220,7 +220,7 @@ impl Config {
     }
 
     /// series_chars sets the character sets for each series.
-    /// If fewer CharSets are provided than series, DefaultCharSet is used for remaining series.
+    /// If fewer CharSets are provided than series, Default is used for remaining series.
     pub fn series_chars(mut self, cs: &[CharSet]) -> Self {
         self.series_chars = cs.to_vec();
         self
