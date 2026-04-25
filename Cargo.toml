@@ -1,5 +1,5 @@
 [package]
-name = "asciigraph"
+name = "asciigraph-rs"
 version = "0.1.0"
 edition = "2024"
 description = "A Rust port of the Go asciigraph library for lightweight ASCII line graphs in the terminal"
