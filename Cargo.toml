@@ -18,5 +18,13 @@ path = "src/lib.rs"
 name = "asciigraph"
 path = "src/main.rs"
 
+[[bin]]
+name = "datagen"
+path = "src/datagen.rs"
+
+[[bin]]
+name = "clear_test"
+path = "src/clear_test.rs"
+
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }

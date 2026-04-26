@@ -117,7 +117,6 @@ fn main() {
 
     for line in lines {
         let line = line.unwrap();
-        // .collect() converts Split<&String> to Vec<&str>
         let mut points: Vec<_> = line.split(&args.delimiter).collect();
 
         if points.len() < args.series_num {
@@ -193,8 +192,13 @@ fn main() {
 
                 let series_refs: Vec<&[f64]> = series_copy.iter().map(|s| s.as_slice()).collect();
                 let plot = plot_many(&series_refs, config);
-                clear();
-                println!("{}", plot);
+                // clear();
+                // println!("{}", plot);
+                // io::stdout().flush().unwrap();
+                // next_flush_time = Instant::now() + flush_interval;
+                let output = format!("\x1b[H\x1b[J{}", plot);
+                print!("{}", output);
+                io::stdout().flush().unwrap();
                 next_flush_time = Instant::now() + flush_interval;
             }
         }
@@ -269,9 +273,4 @@ fn parse_colors(colors: &str) -> Option<Vec<AnsiColor>> {
 
 fn parse_color(color: &str) -> Option<AnsiColor> {
     AnsiColor::get_ansi_color(color)
-}
-
-fn clear() {
-    print!("\x1b[2J\x1b[H");
-    io::stdout().flush().unwrap();
 }

@@ -5,7 +5,8 @@
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
 
 Rust library to make lightweight ASCII line graphs ╭┈╯ in command line apps. This port is a complete and 
-aithful implementation of the Go original (version 0.9.0) [guptarohit/asciigraph](https://github.com/guptarohit/asciigraph),
+faithful implementation of the Go original (version 0.9.0) [guptarohit/asciigraph]
+(https://github.com/guptarohit/asciigraph),
 supporting:
 
 - Single and multi-series plots
@@ -16,11 +17,21 @@ supporting:
 - Y-axis and X-axis value formatters
 - NaN gap handling with proper start and end caps
 - Lower and upper bound constraints
+- Configurable precision for Y-axis labels
+- Line ending configuration (CRLF support)
 - A full CLI binary with realtime streaming support and configurable FPS
+
+Full API documentation is available on [docs.rs](https://docs.rs/asciigraph-rs).
 
 ## Installation
 
-Add this to your `Cargo.toml`:
+Run the following command in your project directory:
+
+```bash
+cargo add asciigraph-rs
+```
+
+Or manually add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
@@ -242,7 +253,7 @@ fn main() {
 
 Install the CLI binary with:
 
-```
+```bash
 cargo install asciigraph-rs
 ```
 
@@ -280,8 +291,14 @@ Options:
 
 Feed data points via stdin:
 
-```
+**Linux/macOS:**
+```bash
 seq 1 72 | asciigraph -h 10 -c "plot data from stdin" --xmin 0 --xmax 40 --xt 5
+```
+
+**Windows:**
+```powershell
+1..72 | ForEach-Object { $_ } | asciigraph -h 10 -c "plot data from stdin" --xmin 0 --xmax 40 --xt 5
 ```
 
 Output:
@@ -306,24 +323,33 @@ Output:
 ### Realtime graphs
 
 The CLI supports streaming data in realtime using the `-r` flag.
-Data is read continuously from stdin and the graph is re-rendered
-at the specified FPS. This is useful for monitoring live metrics
-like ping times, CPU usage, or any continuously updating data source.
-
-**Windows (PowerShell):**
-```powershell
-# Realtime ping graph
-while ($true) {
-    $result = ping -n 1 google.com | Select-String 'time='
-    if ($result -match 'time=(\d+)ms') { echo $matches[1] }
-    Start-Sleep -Milliseconds 200
-} | asciigraph -r -h 10 -w 40 -c "ping (ms)"
-```
+Data is read line by line from stdin, and the graph re-renders
+at the specified FPS.
 
 **Linux/macOS:**
 ```bash
 ping google.com | grep -oP '(?<=time=).*(?=ms)' --line-buffered | asciigraph -r -h 10 -w 40 -c "ping (ms)"
 ```
+
+**Windows:**
+
+A built-in data generator (demo) is included for testing and demonstrating
+realtime mode. Build and run it with:
+
+```powershell
+cargo build
+.\target\debug\datagen.exe
+```
+
+This generates random data and pipes it directly into `asciigraph`
+with realtime rendering enabled. The generator bypasses Windows pipe
+buffering by writing directly to the child process stdin, which is
+required for smooth realtime updates on Windows.
+
+For your own data sources on Windows, pipe buffering can prevent
+realtime updates from rendering correctly. The recommended approach
+is to write a small program in any language that flushes stdout
+explicitly after each line, similar to how `datagen.rs` works.
 
 ## Acknowledgement
 
