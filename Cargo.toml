@@ -1,8 +1,8 @@
 [package]
 name = "asciigraph-rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
-description = "A Rust port of the Go asciigraph library for lightweight ASCII line graphs in the terminal"
+description = "Lightweight ASCII line graphs for the terminal"
 license = "BSD-3-Clause"
 authors = ["Nii Nue <niinue@gmail.com>"]
 repository = "https://github.com/neneodonkor/asciigraph-rs"
