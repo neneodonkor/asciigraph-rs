@@ -245,7 +245,7 @@ impl TryFrom<&str> for AnsiColor {
 /// use asciigraph::AnsiColor;
 /// use std::str::FromStr;
 ///
-/// let not_a_color = AnsiColor::from_str("iorn_man");
+/// let not_a_color = AnsiColor::from_str("ironman");
 /// assert_eq!(not_a_color, Err("invalid color name"));
 /// ```
 impl FromStr for AnsiColor {
