@@ -2,17 +2,57 @@
 
 use std::fmt;
 use std::fmt::Formatter;
+use std::str::FromStr;
 
+// `#[repr(transparent)]` ensures that AnsiColor has the exact same memory layout as a u8, making it zero-cost to wrap
+#[repr(transparent)]
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AnsiColor(u8);
 
 impl AnsiColor {
+    /// Construct new `AnsiColor`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use asciigraph::AnsiColor;
+    ///
+    /// let color = AnsiColor::new(13);
+    ///
+    /// assert_eq!(color.code(), 13);
+    /// ```
     pub fn new(number: u8) -> Self {
         AnsiColor(number)
     }
 
     pub fn code(&self) -> u8 {
         self.0
+    }
+
+    // Mapping the Ansi Color name to color names provided in string.
+    // Output will be Some(AnsiColor(0)) for "default".
+    // To get the number, its AnsiColor::Default.code()
+    //
+    /// # Example
+    ///
+    /// ```
+    /// use asciigraph::AnsiColor;
+    ///
+    /// let color = AnsiColor::AQUA;
+    /// let color_from_str = AnsiColor::get_ansi_color("aqua");
+    ///
+    /// assert!(color_from_str.is_some());
+    /// assert_eq!(color, color_from_str.unwrap());
+    /// ```
+    pub fn get_ansi_color(color: &str) -> Option<AnsiColor> {
+        // .ok() converts Result -> Option
+        // will work same as before.
+        //
+        // in library crate from_str usually return `Result` not `Option`
+        //
+        // implementing [`FromStr`] and [`TryFrom`] is the idiomatic way of
+        // building a Type from &str.
+        AnsiColor::from_str(color).ok()
     }
 
     // Named ANSI 256-color constants
@@ -157,154 +197,206 @@ impl AnsiColor {
     pub const WHITE_SMOKE: AnsiColor = AnsiColor(255);
     pub const YELLOW: AnsiColor = AnsiColor(11);
     pub const YELLOW_GREEN: AnsiColor = AnsiColor(149);
+}
 
-    // Mapping the Ansi Color name to color names provided in string.
-    // Output will be Some(AnsiColor(0)) for "default".
-    // To get the number, its AnsiColor::Default.code()
-    pub fn get_ansi_color(color: &str) -> Option<AnsiColor> {
-        match color {
-            "default"               => Some(AnsiColor::DEFAULT),
-            "aliceblue"             => Some(AnsiColor::ALICE_BLUE),
-            "antiquewhite"          => Some(AnsiColor::ANTIQUE_WHITE),
-            "aqua"                  => Some(AnsiColor::AQUA),
-            "aquamarine"            => Some(AnsiColor::AQUAMARINE),
-            "azure"                 => Some(AnsiColor::AZURE),
-            "beige"                 => Some(AnsiColor::BEIGE),
-            "bisque"                => Some(AnsiColor::BISQUE),
-            "black"                 => Some(AnsiColor::BLACK),
-            "blanchedalmond"        => Some(AnsiColor::BLANCHED_ALMOND),
-            "blue"                  => Some(AnsiColor::BLUE),
-            "blueviolet"            => Some(AnsiColor::BLUE_VIOLET),
-            "brown"                 => Some(AnsiColor::BROWN),
-            "burlywood"             => Some(AnsiColor::BURLY_WOOD),
-            "cadetblue"             => Some(AnsiColor::CADET_BLUE),
-            "chartreuse"            => Some(AnsiColor::CHARTREUSE),
-            "chocolate"             => Some(AnsiColor::CHOCOLATE),
-            "coral"                 => Some(AnsiColor::CORAL),
-            "cornflowerblue"        => Some(AnsiColor::CORNFLOWER_BLUE),
-            "cornsilk"              => Some(AnsiColor::CORNSILK),
-            "crimson"               => Some(AnsiColor::CRIMSON),
-            "cyan"                  => Some(AnsiColor::CYAN),
-            "darkblue"              => Some(AnsiColor::DARK_BLUE),
-            "darkcyan"              => Some(AnsiColor::DARK_CYAN),
-            "darkgoldenrod"         => Some(AnsiColor::DARK_GOLDENROD),
-            "darkgray"              => Some(AnsiColor::DARK_GRAY),
-            "darkgreen"             => Some(AnsiColor::DARK_GREEN),
-            "darkkhaki"             => Some(AnsiColor::DARK_KHAKI),
-            "darkmagenta"           => Some(AnsiColor::DARK_MAGENTA),
-            "darkolivegreen"        => Some(AnsiColor::DARK_OLIVE_GREEN),
-            "darkorange"            => Some(AnsiColor::DARK_ORANGE),
-            "darkorchid"            => Some(AnsiColor::DARK_ORCHID),
-            "darkred"               => Some(AnsiColor::DARK_RED),
-            "darksalmon"            => Some(AnsiColor::DARK_SALMON),
-            "darkseagreen"          => Some(AnsiColor::DARK_SEA_GREEN),
-            "darkslateblue"         => Some(AnsiColor::DARK_SLATE_BLUE),
-            "darkslategray"         => Some(AnsiColor::DARK_SLATE_GRAY),
-            "darkturquoise"         => Some(AnsiColor::DARK_TURQUOISE),
-            "darkviolet"            => Some(AnsiColor::DARK_VIOLET),
-            "deeppink"              => Some(AnsiColor::DEEP_PINK),
-            "deepskyblue"           => Some(AnsiColor::DEEP_SKY_BLUE),
-            "dimgray"               => Some(AnsiColor::DIM_GRAY),
-            "dodgerblue"            => Some(AnsiColor::DODGER_BLUE),
-            "firebrick"             => Some(AnsiColor::FIREBRICK),
-            "floralwhite"           => Some(AnsiColor::FLORAL_WHITE),
-            "forestgreen"           => Some(AnsiColor::FOREST_GREEN),
-            "fuchsia"               => Some(AnsiColor::FUCHSIA),
-            "gainsboro"             => Some(AnsiColor::GAINSBORO),
-            "ghostwhite"            => Some(AnsiColor::GHOST_WHITE),
-            "gold"                  => Some(AnsiColor::GOLD),
-            "goldenrod"             => Some(AnsiColor::GOLDENROD),
-            "gray"                  => Some(AnsiColor::GRAY),
-            "green"                 => Some(AnsiColor::GREEN),
-            "greenyellow"           => Some(AnsiColor::GREEN_YELLOW),
-            "honeydew"              => Some(AnsiColor::HONEYDEW),
-            "hotpink"               => Some(AnsiColor::HOT_PINK),
-            "indianred"             => Some(AnsiColor::INDIAN_RED),
-            "indigo"                => Some(AnsiColor::INDIGO),
-            "ivory"                 => Some(AnsiColor::IVORY),
-            "khaki"                 => Some(AnsiColor::KHAKI),
-            "lavender"              => Some(AnsiColor::LAVENDER),
-            "lavenderblush"         => Some(AnsiColor::LAVENDER_BLUSH),
-            "lawngreen"             => Some(AnsiColor::LAWN_GREEN),
-            "lemonchiffon"          => Some(AnsiColor::LEMON_CHIFFON),
-            "lightblue"             => Some(AnsiColor::LIGHT_BLUE),
-            "lightcoral"            => Some(AnsiColor::LIGHT_CORAL),
-            "lightcyan"             => Some(AnsiColor::LIGHT_CYAN),
-            "lightgoldenrodyellow"  => Some(AnsiColor::LIGHT_GOLDENROD_YELLOW),
-            "lightgray"             => Some(AnsiColor::LIGHT_GRAY),
-            "lightgreen"            => Some(AnsiColor::LIGHT_GREEN),
-            "lightpink"             => Some(AnsiColor::LIGHT_PINK),
-            "lightsalmon"           => Some(AnsiColor::LIGHT_SALMON),
-            "lightseagreen"         => Some(AnsiColor::LIGHT_SEA_GREEN),
-            "lightskyblue"          => Some(AnsiColor::LIGHT_SKY_BLUE),
-            "lightslategray"        => Some(AnsiColor::LIGHT_SLATE_GRAY),
-            "lightsteelblue"        => Some(AnsiColor::LIGHT_STEEL_BLUE),
-            "lightyellow"           => Some(AnsiColor::LIGHT_YELLOW),
-            "lime"                  => Some(AnsiColor::LIME),
-            "limegreen"             => Some(AnsiColor::LIME_GREEN),
-            "linen"                 => Some(AnsiColor::LINEN),
-            "magenta"               => Some(AnsiColor::MAGENTA),
-            "maroon"                => Some(AnsiColor::MAROON),
-            "mediumaquamarine"      => Some(AnsiColor::MEDIUM_AQUAMARINE),
-            "mediumblue"            => Some(AnsiColor::MEDIUM_BLUE),
-            "mediumorchid"          => Some(AnsiColor::MEDIUM_ORCHID),
-            "mediumpurple"          => Some(AnsiColor::MEDIUM_PURPLE),
-            "mediumseagreen"        => Some(AnsiColor::MEDIUM_SEA_GREEN),
-            "mediumslateblue"       => Some(AnsiColor::MEDIUM_SLATE_BLUE),
-            "mediumspringgreen"     => Some(AnsiColor::MEDIUM_SPRING_GREEN),
-            "mediumturquoise"       => Some(AnsiColor::MEDIUM_TURQUOISE),
-            "mediumvioletred"       => Some(AnsiColor::MEDIUM_VIOLET_RED),
-            "midnightblue"          => Some(AnsiColor::MIDNIGHT_BLUE),
-            "mintcream"             => Some(AnsiColor::MINT_CREAM),
-            "mistyrose"             => Some(AnsiColor::MISTY_ROSE),
-            "moccasin"              => Some(AnsiColor::MOCCASIN),
-            "navajowhite"           => Some(AnsiColor::NAVAJO_WHITE),
-            "navy"                  => Some(AnsiColor::NAVY),
-            "oldlace"               => Some(AnsiColor::OLD_LACE),
-            "olive"                 => Some(AnsiColor::OLIVE),
-            "olivedrab"             => Some(AnsiColor::OLIVE_DRAB),
-            "orange"                => Some(AnsiColor::ORANGE),
-            "orangered"             => Some(AnsiColor::ORANGE_RED),
-            "orchid"                => Some(AnsiColor::ORCHID),
-            "palegoldenrod"         => Some(AnsiColor::PALE_GOLDENROD),
-            "palegreen"             => Some(AnsiColor::PALE_GREEN),
-            "paleturquoise"         => Some(AnsiColor::PALE_TURQUOISE),
-            "palevioletred"         => Some(AnsiColor::PALE_VIOLET_RED),
-            "papayawhip"            => Some(AnsiColor::PAPAYA_WHIP),
-            "peachpuff"             => Some(AnsiColor::PEACH_PUFF),
-            "peru"                  => Some(AnsiColor::PERU),
-            "pink"                  => Some(AnsiColor::PINK),
-            "plum"                  => Some(AnsiColor::PLUM),
-            "powderblue"            => Some(AnsiColor::POWDER_BLUE),
-            "purple"                => Some(AnsiColor::PURPLE),
-            "red"                   => Some(AnsiColor::RED),
-            "rosybrown"             => Some(AnsiColor::ROSY_BROWN),
-            "royalblue"             => Some(AnsiColor::ROYAL_BLUE),
-            "saddlebrown"           => Some(AnsiColor::SADDLE_BROWN),
-            "salmon"                => Some(AnsiColor::SALMON),
-            "sandybrown"            => Some(AnsiColor::SANDY_BROWN),
-            "seagreen"              => Some(AnsiColor::SEA_GREEN),
-            "seashell"              => Some(AnsiColor::SEA_SHELL),
-            "sienna"                => Some(AnsiColor::SIENNA),
-            "silver"                => Some(AnsiColor::SILVER),
-            "skyblue"               => Some(AnsiColor::SKY_BLUE),
-            "slateblue"             => Some(AnsiColor::SLATE_BLUE),
-            "slategray"             => Some(AnsiColor::SLATE_GRAY),
-            "snow"                  => Some(AnsiColor::SNOW),
-            "springgreen"           => Some(AnsiColor::SPRING_GREEN),
-            "steelblue"             => Some(AnsiColor::STEEL_BLUE),
-            "tan"                   => Some(AnsiColor::TAN),
-            "teal"                  => Some(AnsiColor::TEAL),
-            "thistle"               => Some(AnsiColor::THISTLE),
-            "tomato"                => Some(AnsiColor::TOMATO),
-            "turquoise"             => Some(AnsiColor::TURQUOISE),
-            "violet"                => Some(AnsiColor::VIOLET),
-            "wheat"                 => Some(AnsiColor::WHEAT),
-            "white"                 => Some(AnsiColor::WHITE),
-            "whitesmoke"            => Some(AnsiColor::WHITE_SMOKE),
-            "yellow"                => Some(AnsiColor::YELLOW),
-            "yellowgreen"           => Some(AnsiColor::YELLOW_GREEN),
-            _                       => None,
+// deligates to [`FromStr`]
+//
+/// # Example
+///
+/// ```
+/// use asciigraph::AnsiColor;
+///
+/// let color = AnsiColor::AQUA;
+/// let color_from_str = AnsiColor::try_from("aqua");
+///
+/// assert!(color_from_str.is_ok());
+/// assert_eq!(color, color_from_str.unwrap());
+/// ```
+impl TryFrom<&str> for AnsiColor {
+    type Error = &'static str;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        AnsiColor::from_str(value)
+    }
+}
+
+// implementing [`FromStr`] and [`TryFrom`] is the idiomatic way of
+// building a Type from &str.
+//
+/// # Example
+///
+/// ```
+/// use asciigraph::AnsiColor;
+/// use std::str::FromStr;
+///
+/// let color = AnsiColor::AQUA;
+/// let color_from_str = AnsiColor::from_str("aqua");
+/// let color_parsed = "aqua".parse::<AnsiColor>();
+///
+/// assert!(color_from_str.is_ok());
+/// assert_eq!(color, color_from_str.unwrap());
+/// assert_eq!(color, color_parsed.unwrap());
+/// ```
+///
+/// # Error
+///
+/// return `Err()` on invalid color name.
+/// ```
+/// use asciigraph::AnsiColor;
+/// use std::str::FromStr;
+///
+/// let not_a_color = AnsiColor::from_str("iorn_man");
+/// assert_eq!(not_a_color, Err("invalid color name"));
+/// ```
+impl FromStr for AnsiColor {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // sanitizing `&str` will make api more user friendly
+        // now "AliceBlue", "aliceblue", or "ALICEBLUE" will just work.
+        match s.to_lowercase().replace('_', "").as_str() {
+            "default" => Ok(AnsiColor::DEFAULT),
+            "aliceblue" => Ok(AnsiColor::ALICE_BLUE),
+            "antiquewhite" => Ok(AnsiColor::ANTIQUE_WHITE),
+            "aqua" => Ok(AnsiColor::AQUA),
+            "aquamarine" => Ok(AnsiColor::AQUAMARINE),
+            "azure" => Ok(AnsiColor::AZURE),
+            "beige" => Ok(AnsiColor::BEIGE),
+            "bisque" => Ok(AnsiColor::BISQUE),
+            "black" => Ok(AnsiColor::BLACK),
+            "blanchedalmond" => Ok(AnsiColor::BLANCHED_ALMOND),
+            "blue" => Ok(AnsiColor::BLUE),
+            "blueviolet" => Ok(AnsiColor::BLUE_VIOLET),
+            "brown" => Ok(AnsiColor::BROWN),
+            "burlywood" => Ok(AnsiColor::BURLY_WOOD),
+            "cadetblue" => Ok(AnsiColor::CADET_BLUE),
+            "chartreuse" => Ok(AnsiColor::CHARTREUSE),
+            "chocolate" => Ok(AnsiColor::CHOCOLATE),
+            "coral" => Ok(AnsiColor::CORAL),
+            "cornflowerblue" => Ok(AnsiColor::CORNFLOWER_BLUE),
+            "cornsilk" => Ok(AnsiColor::CORNSILK),
+            "crimson" => Ok(AnsiColor::CRIMSON),
+            "cyan" => Ok(AnsiColor::CYAN),
+            "darkblue" => Ok(AnsiColor::DARK_BLUE),
+            "darkcyan" => Ok(AnsiColor::DARK_CYAN),
+            "darkgoldenrod" => Ok(AnsiColor::DARK_GOLDENROD),
+            "darkgray" => Ok(AnsiColor::DARK_GRAY),
+            "darkgreen" => Ok(AnsiColor::DARK_GREEN),
+            "darkkhaki" => Ok(AnsiColor::DARK_KHAKI),
+            "darkmagenta" => Ok(AnsiColor::DARK_MAGENTA),
+            "darkolivegreen" => Ok(AnsiColor::DARK_OLIVE_GREEN),
+            "darkorange" => Ok(AnsiColor::DARK_ORANGE),
+            "darkorchid" => Ok(AnsiColor::DARK_ORCHID),
+            "darkred" => Ok(AnsiColor::DARK_RED),
+            "darksalmon" => Ok(AnsiColor::DARK_SALMON),
+            "darkseagreen" => Ok(AnsiColor::DARK_SEA_GREEN),
+            "darkslateblue" => Ok(AnsiColor::DARK_SLATE_BLUE),
+            "darkslategray" => Ok(AnsiColor::DARK_SLATE_GRAY),
+            "darkturquoise" => Ok(AnsiColor::DARK_TURQUOISE),
+            "darkviolet" => Ok(AnsiColor::DARK_VIOLET),
+            "deeppink" => Ok(AnsiColor::DEEP_PINK),
+            "deepskyblue" => Ok(AnsiColor::DEEP_SKY_BLUE),
+            "dimgray" => Ok(AnsiColor::DIM_GRAY),
+            "dodgerblue" => Ok(AnsiColor::DODGER_BLUE),
+            "firebrick" => Ok(AnsiColor::FIREBRICK),
+            "floralwhite" => Ok(AnsiColor::FLORAL_WHITE),
+            "forestgreen" => Ok(AnsiColor::FOREST_GREEN),
+            "fuchsia" => Ok(AnsiColor::FUCHSIA),
+            "gainsboro" => Ok(AnsiColor::GAINSBORO),
+            "ghostwhite" => Ok(AnsiColor::GHOST_WHITE),
+            "gold" => Ok(AnsiColor::GOLD),
+            "goldenrod" => Ok(AnsiColor::GOLDENROD),
+            "gray" => Ok(AnsiColor::GRAY),
+            "green" => Ok(AnsiColor::GREEN),
+            "greenyellow" => Ok(AnsiColor::GREEN_YELLOW),
+            "honeydew" => Ok(AnsiColor::HONEYDEW),
+            "hotpink" => Ok(AnsiColor::HOT_PINK),
+            "indianred" => Ok(AnsiColor::INDIAN_RED),
+            "indigo" => Ok(AnsiColor::INDIGO),
+            "ivory" => Ok(AnsiColor::IVORY),
+            "khaki" => Ok(AnsiColor::KHAKI),
+            "lavender" => Ok(AnsiColor::LAVENDER),
+            "lavenderblush" => Ok(AnsiColor::LAVENDER_BLUSH),
+            "lawngreen" => Ok(AnsiColor::LAWN_GREEN),
+            "lemonchiffon" => Ok(AnsiColor::LEMON_CHIFFON),
+            "lightblue" => Ok(AnsiColor::LIGHT_BLUE),
+            "lightcoral" => Ok(AnsiColor::LIGHT_CORAL),
+            "lightcyan" => Ok(AnsiColor::LIGHT_CYAN),
+            "lightgoldenrodyellow" => Ok(AnsiColor::LIGHT_GOLDENROD_YELLOW),
+            "lightgray" => Ok(AnsiColor::LIGHT_GRAY),
+            "lightgreen" => Ok(AnsiColor::LIGHT_GREEN),
+            "lightpink" => Ok(AnsiColor::LIGHT_PINK),
+            "lightsalmon" => Ok(AnsiColor::LIGHT_SALMON),
+            "lightseagreen" => Ok(AnsiColor::LIGHT_SEA_GREEN),
+            "lightskyblue" => Ok(AnsiColor::LIGHT_SKY_BLUE),
+            "lightslategray" => Ok(AnsiColor::LIGHT_SLATE_GRAY),
+            "lightsteelblue" => Ok(AnsiColor::LIGHT_STEEL_BLUE),
+            "lightyellow" => Ok(AnsiColor::LIGHT_YELLOW),
+            "lime" => Ok(AnsiColor::LIME),
+            "limegreen" => Ok(AnsiColor::LIME_GREEN),
+            "linen" => Ok(AnsiColor::LINEN),
+            "magenta" => Ok(AnsiColor::MAGENTA),
+            "maroon" => Ok(AnsiColor::MAROON),
+            "mediumaquamarine" => Ok(AnsiColor::MEDIUM_AQUAMARINE),
+            "mediumblue" => Ok(AnsiColor::MEDIUM_BLUE),
+            "mediumorchid" => Ok(AnsiColor::MEDIUM_ORCHID),
+            "mediumpurple" => Ok(AnsiColor::MEDIUM_PURPLE),
+            "mediumseagreen" => Ok(AnsiColor::MEDIUM_SEA_GREEN),
+            "mediumslateblue" => Ok(AnsiColor::MEDIUM_SLATE_BLUE),
+            "mediumspringgreen" => Ok(AnsiColor::MEDIUM_SPRING_GREEN),
+            "mediumturquoise" => Ok(AnsiColor::MEDIUM_TURQUOISE),
+            "mediumvioletred" => Ok(AnsiColor::MEDIUM_VIOLET_RED),
+            "midnightblue" => Ok(AnsiColor::MIDNIGHT_BLUE),
+            "mintcream" => Ok(AnsiColor::MINT_CREAM),
+            "mistyrose" => Ok(AnsiColor::MISTY_ROSE),
+            "moccasin" => Ok(AnsiColor::MOCCASIN),
+            "navajowhite" => Ok(AnsiColor::NAVAJO_WHITE),
+            "navy" => Ok(AnsiColor::NAVY),
+            "oldlace" => Ok(AnsiColor::OLD_LACE),
+            "olive" => Ok(AnsiColor::OLIVE),
+            "olivedrab" => Ok(AnsiColor::OLIVE_DRAB),
+            "orange" => Ok(AnsiColor::ORANGE),
+            "orangered" => Ok(AnsiColor::ORANGE_RED),
+            "orchid" => Ok(AnsiColor::ORCHID),
+            "palegoldenrod" => Ok(AnsiColor::PALE_GOLDENROD),
+            "palegreen" => Ok(AnsiColor::PALE_GREEN),
+            "paleturquoise" => Ok(AnsiColor::PALE_TURQUOISE),
+            "palevioletred" => Ok(AnsiColor::PALE_VIOLET_RED),
+            "papayawhip" => Ok(AnsiColor::PAPAYA_WHIP),
+            "peachpuff" => Ok(AnsiColor::PEACH_PUFF),
+            "peru" => Ok(AnsiColor::PERU),
+            "pink" => Ok(AnsiColor::PINK),
+            "plum" => Ok(AnsiColor::PLUM),
+            "powderblue" => Ok(AnsiColor::POWDER_BLUE),
+            "purple" => Ok(AnsiColor::PURPLE),
+            "red" => Ok(AnsiColor::RED),
+            "rosybrown" => Ok(AnsiColor::ROSY_BROWN),
+            "royalblue" => Ok(AnsiColor::ROYAL_BLUE),
+            "saddlebrown" => Ok(AnsiColor::SADDLE_BROWN),
+            "salmon" => Ok(AnsiColor::SALMON),
+            "sandybrown" => Ok(AnsiColor::SANDY_BROWN),
+            "seagreen" => Ok(AnsiColor::SEA_GREEN),
+            "seashell" => Ok(AnsiColor::SEA_SHELL),
+            "sienna" => Ok(AnsiColor::SIENNA),
+            "silver" => Ok(AnsiColor::SILVER),
+            "skyblue" => Ok(AnsiColor::SKY_BLUE),
+            "slateblue" => Ok(AnsiColor::SLATE_BLUE),
+            "slategray" => Ok(AnsiColor::SLATE_GRAY),
+            "snow" => Ok(AnsiColor::SNOW),
+            "springgreen" => Ok(AnsiColor::SPRING_GREEN),
+            "steelblue" => Ok(AnsiColor::STEEL_BLUE),
+            "tan" => Ok(AnsiColor::TAN),
+            "teal" => Ok(AnsiColor::TEAL),
+            "thistle" => Ok(AnsiColor::THISTLE),
+            "tomato" => Ok(AnsiColor::TOMATO),
+            "turquoise" => Ok(AnsiColor::TURQUOISE),
+            "violet" => Ok(AnsiColor::VIOLET),
+            "wheat" => Ok(AnsiColor::WHEAT),
+            "white" => Ok(AnsiColor::WHITE),
+            "whitesmoke" => Ok(AnsiColor::WHITE_SMOKE),
+            "yellow" => Ok(AnsiColor::YELLOW),
+            "yellowgreen" => Ok(AnsiColor::YELLOW_GREEN),
+            _ => Err("invalid color name"),
         }
     }
 }
@@ -329,7 +421,11 @@ impl fmt::Display for AnsiColor {
             return write!(f, "\x1b[0m");
         }
 
-        let c = if *self == AnsiColor::BLACK { 0u8 } else { self.0 };
+        let c = if *self == AnsiColor::BLACK {
+            0u8
+        } else {
+            self.0
+        };
 
         if c <= AnsiColor::SILVER.into() {
             write!(f, "\x1b[{}m", 30 + c)
@@ -340,4 +436,3 @@ impl fmt::Display for AnsiColor {
         }
     }
 }
-
