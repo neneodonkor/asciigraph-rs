@@ -695,7 +695,7 @@ mod tests {
         let s1 = vec![0.0, 0.0];
         let s2 = vec![f64::NAN, 0.0];
         let data: Vec<&[f64]> = vec![&s1, &s2];
-        let config = Config::default().series_colors(&[AnsiColor::DEFAULT, AnsiColor::RED]);
+        let config = Config::default().series_colors(&[AnsiColor::default(), AnsiColor::RED]);
         let expected = clean(" 0.00 ┼\x1b[91m╶\x1b[0m");
         assert_eq!(plot_many(&data, config), expected);
     }

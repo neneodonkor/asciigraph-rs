@@ -15,7 +15,7 @@ impl Default for Cell {
     fn default() -> Self {
         Cell {
             text: " ".to_string(),
-            color: AnsiColor::DEFAULT,
+            color: AnsiColor::default(),
         }
     }
 }
@@ -230,7 +230,7 @@ pub fn plot_many(data: &[&[f64]], config: Config) -> String {
 
     for i in 0..data.len() {
         let series = &data[i];
-        let mut color = AnsiColor::DEFAULT;
+        let mut color = AnsiColor::default();
 
         if i < config.series_colors.len() {
             color = config.series_colors[i];
@@ -323,7 +323,7 @@ pub fn plot_many(data: &[&[f64]], config: Config) -> String {
             }
         }
 
-        let mut c = AnsiColor::DEFAULT;
+        let mut c = AnsiColor::default();
 
         for v in horizontal[..=last_char_index].iter() {
             if v.color != c {
@@ -334,8 +334,8 @@ pub fn plot_many(data: &[&[f64]], config: Config) -> String {
             lines.push_str(v.text.as_str());
         }
 
-        if c != AnsiColor::DEFAULT {
-            lines.push_str(AnsiColor::DEFAULT.to_string().as_str());
+        if c != AnsiColor::default() {
+            lines.push_str(AnsiColor::default().to_string().as_str());
         }
     }
 
@@ -353,14 +353,14 @@ pub fn plot_many(data: &[&[f64]], config: Config) -> String {
             lines.push_str(&" ".repeat((len_max - config.caption.len())/2));
         }
 
-        if config.caption_color != AnsiColor::DEFAULT {
+        if config.caption_color != AnsiColor::default() {
             lines.push_str(config.caption_color.to_string().as_str());
         }
 
         lines.push_str(config.caption.as_str());
 
-        if config.caption_color != AnsiColor::DEFAULT {
-            lines.push_str(AnsiColor::DEFAULT.to_string().as_str())
+        if config.caption_color != AnsiColor::default() {
+            lines.push_str(AnsiColor::default().to_string().as_str())
         }
     }
 
@@ -479,14 +479,14 @@ fn add_x_axis(lines: &mut String, config: &Config, len_max: usize, left_pad: usi
     let text_stream = axis_line.iter().collect::<String>();
     let axis_str = text_stream.trim_end();
 
-    if config.axis_color != AnsiColor::DEFAULT {
+    if config.axis_color != AnsiColor::default() {
         lines.push_str(config.axis_color.to_string().as_str());
     }
 
     lines.push_str(axis_str);
 
-    if config.axis_color != AnsiColor::DEFAULT {
-        lines.push_str(AnsiColor::DEFAULT.to_string().as_str());
+    if config.axis_color != AnsiColor::default() {
+        lines.push_str(AnsiColor::default().to_string().as_str());
     }
 
     // label line: place each label centered on its tick column.
@@ -543,14 +543,14 @@ fn add_x_axis(lines: &mut String, config: &Config, len_max: usize, left_pad: usi
     if !label_str.is_empty() {
         lines.push_str(config.line_ending.as_str());
 
-        if config.label_color != AnsiColor::DEFAULT {
+        if config.label_color != AnsiColor::default() {
             lines.push_str(config.label_color.to_string().as_str());
         }
 
         lines.push_str(label_str);
 
-        if config.label_color != AnsiColor::DEFAULT {
-            lines.push_str(AnsiColor::DEFAULT.to_string().as_str());
+        if config.label_color != AnsiColor::default() {
+            lines.push_str(AnsiColor::default().to_string().as_str());
         }
     }
 }

@@ -154,9 +154,9 @@ fn main() {
                 let colors_series: Vec<AnsiColor> = parse_colors(&args.series_colors)
                     .unwrap_or_default();
 
-                let cc = parse_color(&args.caption_color).unwrap_or(AnsiColor::DEFAULT);
-                let ac = parse_color(&args.axis_color).unwrap_or(AnsiColor::DEFAULT);
-                let lc = parse_color(&args.label_color).unwrap_or(AnsiColor::DEFAULT);
+                let cc = parse_color(&args.caption_color).unwrap_or(AnsiColor::default());
+                let ac = parse_color(&args.axis_color).unwrap_or(AnsiColor::default());
+                let lc = parse_color(&args.label_color).unwrap_or(AnsiColor::default());
 
                 let legends: Vec<&str> = if args.series_legends.is_empty() {
                     vec![]
@@ -214,9 +214,9 @@ fn main() {
             .unwrap_or_default();
 
         let series_copy = series.iter().map(|s| s.to_vec()).collect::<Vec<_>>();
-        let cc = parse_color(&args.caption_color).unwrap_or(AnsiColor::DEFAULT);
-        let ac = parse_color(&args.axis_color).unwrap_or(AnsiColor::DEFAULT);
-        let lc = parse_color(&args.label_color).unwrap_or(AnsiColor::DEFAULT);
+        let cc = parse_color(&args.caption_color).unwrap_or(AnsiColor::default());
+        let ac = parse_color(&args.axis_color).unwrap_or(AnsiColor::default());
+        let lc = parse_color(&args.label_color).unwrap_or(AnsiColor::default());
 
         let legends: Vec<&str> = if args.series_legends.is_empty() {
             vec![]
