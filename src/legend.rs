@@ -5,7 +5,7 @@ use crate::options::Config;
 
 /// Create legend item as a colored box and text
 pub(crate) fn create_legend_item(text: &str, color: AnsiColor) -> (String, usize) {
-    let t = format!("{}■{} {}", color, AnsiColor::DEFAULT, text);
+    let t = format!("{}■{} {}", color, AnsiColor::default(), text);
     let l = text.chars().count() + 2;
 
     (t, l)
@@ -24,7 +24,7 @@ pub(crate) fn add_legends(lines: &mut String, config: &Config, len_max: usize, l
 
     for (i, text) in config.series_legends.iter().enumerate() {
         // Use default color if series_colors is not set or index is out of range
-        let mut color = AnsiColor::DEFAULT;
+        let mut color = AnsiColor::default();
         if i < config.series_colors.len() {
             color = config.series_colors[i];
         }
