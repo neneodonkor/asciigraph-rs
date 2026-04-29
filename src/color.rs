@@ -83,16 +83,6 @@ macro_rules! __impl_const {
     }
 }
 
-// converts COLOR_01 to "color01"
-macro_rules! __match_arms {
-    ( $($name:ident => $code:expr),* $(,)? ) => {
-        "default" => Ok(AnsiColor::default()),
-        $(
-            s if s == stringify!($name).to_lowercase().replace("_", "") => Ok(AnsiColor::$name),
-        )*
-    };
-}
-
 macro_rules! __impl_from_str {
     ( $($name:ident => $code:expr),* $(,)? ) => {
         /// # Example
