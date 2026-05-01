@@ -1,6 +1,6 @@
 [package]
 name = "asciigraph-rs"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2024"
 description = "Lightweight ASCII line graphs for the terminal"
 license = "BSD-3-Clause"

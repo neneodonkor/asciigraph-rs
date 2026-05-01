@@ -1,6 +1,7 @@
+// This is the main entry point into the CLI.
+
 use std::io::{self, BufRead, Write};
 use std::time::{Duration, Instant};
-// This is the main entry point into the CLI.
 use clap::{Parser};
 use asciigraph;
 use asciigraph::{AnsiColor, CharSet, create_char_set, plot_many};
@@ -107,9 +108,7 @@ fn main() {
     let x_axis_enabled = !args.x_axis_min.is_nan() && !args.x_axis_max.is_nan();
 
     // 1 -------------------------------------------------------------------------------------------
-
-    // s := bufio.NewScanner(os.Stdin)
-    // s.Split(bufio.ScanLines)
+    
     let stdin = io::stdin();
     let lines = stdin.lock().lines();
     let mut next_flush_time = Instant::now();
@@ -192,10 +191,6 @@ fn main() {
 
                 let series_refs: Vec<&[f64]> = series_copy.iter().map(|s| s.as_slice()).collect();
                 let plot = plot_many(&series_refs, config);
-                // clear();
-                // println!("{}", plot);
-                // io::stdout().flush().unwrap();
-                // next_flush_time = Instant::now() + flush_interval;
                 let output = format!("\x1b[H\x1b[J{}", plot);
                 print!("{}", output);
                 io::stdout().flush().unwrap();

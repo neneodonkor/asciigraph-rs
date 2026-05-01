@@ -22,6 +22,7 @@ supporting:
 - A full CLI binary with realtime streaming support and configurable FPS
 
 Full API documentation is available on [docs.rs](https://docs.rs/asciigraph-rs).
+[Changelog](CHANGELOG.md)
 
 ## Installation
 
@@ -248,6 +249,10 @@ fn main() {
     println!("{}", graph);
 }
 ```
+
+For a full list of features including zero-line highlighting, threshold lines,
+moving average overlay, X-axis configuration, and many more features, see [FEATURES.md](FEATURES.
+md).
 
 ## CLI Installation
 

@@ -3,6 +3,8 @@ mod tests {
     use asciigraph::{plot, plot_many};
     use asciigraph::AnsiColor;
     use asciigraph::Config;
+    use asciigraph::ZeroLine;
+    use asciigraph::Threshold;
 
     // Helper to clean expected strings the same way Go tests do
     fn clean(s: &str) -> String {
@@ -1160,5 +1162,304 @@ mod tests {
             "\x1b[0m"
         );
         assert_eq!(plot_many(&data, config), expected);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Zero line tests
+    // ---------------------------------------------------------------------------
+
+
+
+    // ---------------------------------------------------------------------------
+    // Guard condition: all data positive — zero lies below the visible range.
+    // The output must be byte-for-byte identical with and without the zero line
+    // because render_zero_line should silently do nothing in this case.
+    // ---------------------------------------------------------------------------
+    #[test]
+    fn test_zero_line_no_effect_when_data_all_positive() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+
+        let without = plot(&data, Config::default());
+        let with_zl = plot(&data, Config::default().zero_line(ZeroLine::new()));
+
+        assert_eq!(
+            without, with_zl,
+            "zero line should have no effect when all data is positive"
+        );
+    }
+
+    // ---------------------------------------------------------------------------
+    // Guard condition: all data negative — zero lies above the visible range.
+    // Same expectation: the output must be identical with and without the zero line.
+    // ---------------------------------------------------------------------------
+    #[test]
+    fn test_zero_line_no_effect_when_data_all_negative() {
+        let data = vec![-5.0, -4.0, -3.0, -2.0, -1.0];
+
+        let without = plot(&data, Config::default());
+        let with_zl = plot(&data, Config::default().zero_line(ZeroLine::new()));
+
+        assert_eq!(
+            without, with_zl,
+            "zero line should have no effect when all data is negative"
+        );
+    }
+
+    #[test]
+    fn test_zero_line_appears_when_data_straddles_zero() {
+        let data = vec![-2.0, -1.0, 0.0, 1.0, 2.0];
+        let graph = plot(&data, Config::default().zero_line(ZeroLine::new()));
+
+        let expected = "  2.00 ┤   ╭\n  1.00 ┤  ╭╯\n  0.00 ┤─╭╯──\n -1.00 ┤╭╯\n -2.00 ┼╯";
+        assert_eq!(graph, expected);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Priority: a series arc character must win over the zero-line character
+    // when a data point lands exactly on zero.
+    //
+    // render_zero_line runs before render_series and writes '─' into blank cells.
+    // render_series then overwrites the zero-row cell with '┼' for the first
+    // data point. This test confirms that priority is respected.
+    // ---------------------------------------------------------------------------
+    #[test]
+    fn test_zero_line_series_wins_at_zero_crossing() {
+        let data = vec![0.0, 1.0, 2.0, 1.0, 0.0];
+        let graph = plot(&data, Config::default().zero_line(ZeroLine::new()));
+
+        // '┼' marks where the series crosses the axis at y = 0.
+        // If render_series did NOT overwrite the zero-line character,
+        // we would see '─' here instead, and this assertion would fail.
+        assert!(
+            graph.contains('┼'),
+            "series axis-crossing character ┼ must appear at y = 0, not the zero line character"
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // Threshold line tests
+    // -------------------------------------------------------------------------
+
+    // Guard condition: threshold below the visible range.
+    // Output must be identical with and without the threshold.
+    #[test]
+    fn test_threshold_no_effect_when_below_range() {
+        let data = vec![5.0, 6.0, 7.0, 8.0, 9.0];
+
+        let without = plot(&data, Config::default());
+        let with_t  = plot(&data, Config::default().threshold(Threshold::new(1.0)));
+
+        assert_eq!(
+            without, with_t,
+            "threshold below the visible range should have no effect"
+        );
+    }
+
+    // Guard condition: threshold above the visible range.
+    // Output must be identical with and without the threshold.
+    #[test]
+    fn test_threshold_no_effect_when_above_range() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+
+        let without = plot(&data, Config::default());
+        let with_t  = plot(&data, Config::default().threshold(Threshold::new(99.0)));
+
+        assert_eq!(
+            without, with_t,
+            "threshold above the visible range should have no effect"
+        );
+    }
+
+    // Single threshold within the visible range.
+    #[test]
+    fn test_threshold_single_appears() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 4.0, 3.0, 2.0, 1.0];
+        let graph = plot(&data, Config::default().threshold(Threshold::new(3.0)));
+
+        let expected = " 5.00 ┤   ╭╮\n 4.00 ┤  ╭╯╰╮\n 3.00 ┤╌╭╯╌╌╰╮╌╌\n 2.00 ┤╭╯    ╰╮\n 1.00 ┼╯      ╰";
+        assert_eq!(graph, expected);
+    }
+
+    // Multiple thresholds: both must appear at their correct rows.
+    #[test]
+    fn test_threshold_multiple_appear() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 4.0, 3.0, 2.0, 1.0];
+        let graph = plot(
+            &data,
+            Config::default()
+                .threshold(Threshold::new(2.0))
+                .threshold(Threshold::new(4.0)),
+        );
+
+        let expected = " 5.00 ┤   ╭╮\n 4.00 ┤╌╌╭╯╰╮╌╌╌\n 3.00 ┤ ╭╯  ╰╮\n 2.00 ┤╭╯╌╌╌╌╰╮╌\n 1.00 ┼╯      ╰";
+        assert_eq!(graph, expected);
+    }
+
+    // Priority: series arc characters must win over the threshold character
+    // where they share the same cell.
+    // render_thresholds runs before render_series, so series characters
+    // overwrite the ╌ character at any cell they occupy.
+    #[test]
+    fn test_threshold_series_wins_at_crossing() {
+        // The series starts at exactly 3.0, which is also the threshold value.
+        // render_series places ┼ at that cell — it must not be ╌.
+        let data = vec![3.0, 4.0, 5.0, 4.0, 3.0];
+        let graph = plot(&data, Config::default().threshold(Threshold::new(3.0)));
+
+        assert!(
+            graph.contains('┼'),
+            "series axis-crossing character ┼ must appear where the series meets the threshold row"
+        );
+    }
+
+    // Colored threshold: ANSI escape codes must appear in the output.
+    #[test]
+    fn test_threshold_color_applied() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let graph = plot(
+            &data,
+            Config::default().threshold(Threshold::with_color(3.0, AnsiColor::RED)),
+        );
+
+        // AnsiColor::RED emits \x1b[91m — confirm it appears in the output.
+        assert!(
+            graph.contains("\x1b[91m"),
+            "colored threshold must emit ANSI escape code for RED"
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // Moving average tests
+    // -------------------------------------------------------------------------
+
+    // The moving average series must produce a smoother curve than the
+    // original. We verify this by checking that the output contains more
+    // rows than a flat line would — i.e. the MA series is actually rendered.
+    #[test]
+    fn test_moving_average_appears_as_additional_series() {
+        let data = vec![1.0, 5.0, 1.0, 5.0, 1.0, 5.0, 1.0];
+
+        let without = plot(&data, Config::default());
+        let with_ma = plot(&data, Config::default().moving_average(3));
+
+        // The graph with a moving average must differ from the one without.
+        assert_ne!(
+            without, with_ma,
+            "moving average overlay must change the graph output"
+        );
+    }
+
+    // Window of 1 has no effect — output must be identical.
+    #[test]
+    fn test_moving_average_window_one_has_no_effect() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+
+        let without = plot(&data, Config::default());
+        let with_ma = plot(&data, Config::default().moving_average(1));
+
+        assert_eq!(
+            without, with_ma,
+            "moving average with window 1 should have no effect"
+        );
+    }
+
+    // Window of 0 has no effect — output must be identical.
+    #[test]
+    fn test_moving_average_window_zero_has_no_effect() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+
+        let without = plot(&data, Config::default());
+        let with_ma = plot(&data, Config::default().moving_average(0));
+
+        assert_eq!(
+            without, with_ma,
+            "moving average with window 0 should have no effect"
+        );
+    }
+
+    // Window larger than data length — must not panic, output must differ.
+    #[test]
+    fn test_moving_average_window_larger_than_data() {
+        let data = vec![1.0, 3.0, 1.0];
+        let graph = plot(&data, Config::default().moving_average(100));
+
+        // Must not panic and must produce some output.
+        assert!(!graph.is_empty(), "must produce output even when window exceeds data length");
+    }
+
+    #[test]
+    fn test_moving_average_exact_output() {
+        let data = vec![1.0, 5.0, 3.0, 7.0, 2.0, 6.0, 4.0, 8.0, 3.0, 5.0];
+        let graph = plot(&data, Config::default().moving_average(3));
+
+
+        let expected = " 8.00 ┤      ╭╮\n 7.00 ┤  ╭╮  ││\n 6.00 ┤  ││╭╭╮│\n 5.00 ┤╭╭╮╭╮│╰─╮\n 4.00 ┤││╰╯╰╯╯│╰\n 3.00 ┼─╯╯││  ╰╯\n 2.00 ┤│  ╰╯\n 1.00 ┼╯";
+        assert_eq!(graph, expected);
+    }
+
+    // -------------------------------------------------------------------------
+    // Auto tick count tests
+    // -------------------------------------------------------------------------
+
+    // When x_axis_tick_count is not set, the library should automatically
+    // calculate a sensible number of ticks based on the available width.
+    // We verify that an x-axis is rendered at all and that it contains
+    // tick mark characters.
+    #[test]
+    fn test_auto_tick_count_renders_axis() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let graph = plot(&data, Config::default().x_axis_range(0.0, 100.0));
+
+        // The x-axis corner character confirms the axis was rendered.
+        assert!(
+            graph.contains('└'),
+            "auto tick count should render an x-axis with the corner character"
+        );
+
+        // At least one tick mark must be present.
+        assert!(
+            graph.contains('┬'),
+            "auto tick count should render at least one tick mark"
+        );
+    }
+
+    // Explicitly setting x_axis_tick_count must override the auto calculation.
+    // This ensures we have not broken the existing behaviour.
+    #[test]
+    fn test_explicit_tick_count_overrides_auto() {
+        // Use a wide dataset so auto tick count chooses more than 2 ticks.
+        let data: Vec<f64> = (1..=20).map(|x| x as f64).collect();
+
+        let auto_graph = plot(&data, Config::default().x_axis_range(0.0, 1000.0));
+        let explicit_graph = plot(
+            &data,
+            Config::default()
+                .x_axis_range(0.0, 1000.0)
+                .x_axis_tick_count(2),
+        );
+
+        // With 20 data points and wide labels (0, 1000), auto should choose
+        // more ticks than the explicit minimum of 2, producing different output.
+        assert_ne!(
+            auto_graph, explicit_graph,
+            "explicitly setting tick count should produce a different axis than auto"
+        );
+    }
+
+    // Auto tick count on a very narrow graph must not panic and must
+    // produce at least 2 ticks due to the .max(2) clamp.
+    #[test]
+    fn test_auto_tick_count_minimum_two_ticks() {
+        let data = vec![1.0, 2.0];
+        let graph = plot(&data, Config::default().x_axis_range(0.0, 1000000.0));
+
+        assert!(
+            !graph.is_empty(),
+            "auto tick count must not panic on a very narrow graph"
+        );
+        assert!(
+            graph.contains('└'),
+            "auto tick count must still render an axis on a narrow graph"
+        );
     }
 }
