@@ -26,7 +26,10 @@ pub(crate) fn add_x_axis(lines: &mut String, config: &Config, len_max: usize, le
     if len_max == 1 {
         tick_count = 1;
     } else if tick_count < 2 {
-        tick_count = 5;
+        let min_label = default_x_axis_formatter(x_min);
+        let max_label = default_x_axis_formatter(x_max);
+        let avg_label_width = (min_label.chars().count() + max_label.chars().count()) / 2 + 1;
+        tick_count = (len_max / avg_label_width).max(2);
     }
 
     if tick_count > len_max {

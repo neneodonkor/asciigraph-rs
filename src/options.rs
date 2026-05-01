@@ -374,11 +374,20 @@ impl Config {
         self
     }
 
-    /// Sets the number of tick marks on the X-axis.
+    /// Sets the number of tick marks on the X-axis, overriding the automatic
+    /// calculation.
+    ///
+    /// When this is not called, the library automatically determines a sensible
+    /// tick count based on the available graph width and the estimated width of
+    /// the tick labels. Call this method only when you need precise control over
+    /// the number of ticks — for example, to match a specific grid or to reduce
+    /// clutter on a narrow graph.
+    ///
+    /// The minimum accepted value is `2`. Values below `2` are ignored and the
+    /// automatic calculation is used instead.
     ///
     /// Only takes effect when an X-axis range has been set via
-    /// [`Config::x_axis_range()`]. The minimum accepted value is `2`. Values
-    /// below `2` are ignored and the default of `5` is used instead.
+    /// [`Config::x_axis_range()`].
     pub fn x_axis_tick_count(mut self, count: usize) -> Self {
         if count >= 2 {
             self.x_axis_tick_count = count;
@@ -389,8 +398,24 @@ impl Config {
     /// Enables the X-axis and maps the domain `[min, max]` onto the plot width.
     ///
     /// Once set, an X-axis line and tick labels are rendered below the graph
-    /// body. The number of ticks defaults to `5` unless overridden with
-    /// [`Config::x_axis_tick_count()`].
+    /// body. The number of ticks is calculated automatically based on the
+    /// available graph width and the estimated label width — no additional
+    /// configuration is required. To override the automatic calculation, call
+    /// [`Config::x_axis_tick_count()`] with the desired number of ticks.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use asciigraph::Config;
+    ///
+    /// // Automatic tick count — no x_axis_tick_count call needed.
+    /// let config = Config::default().x_axis_range(0.0, 100.0);
+    ///
+    /// // Explicit tick count — overrides the automatic calculation.
+    /// let config = Config::default()
+    ///     .x_axis_range(0.0, 100.0)
+    ///     .x_axis_tick_count(3);
+    /// ```
     pub fn x_axis_range(mut self, min: f64, max: f64) -> Self {
         self.x_axis_range = Some([min, max]);
         self

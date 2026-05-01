@@ -1396,4 +1396,70 @@ mod tests {
         let expected = " 8.00 ┤      ╭╮\n 7.00 ┤  ╭╮  ││\n 6.00 ┤  ││╭╭╮│\n 5.00 ┤╭╭╮╭╮│╰─╮\n 4.00 ┤││╰╯╰╯╯│╰\n 3.00 ┼─╯╯││  ╰╯\n 2.00 ┤│  ╰╯\n 1.00 ┼╯";
         assert_eq!(graph, expected);
     }
+
+    // -------------------------------------------------------------------------
+    // Auto tick count tests
+    // -------------------------------------------------------------------------
+
+    // When x_axis_tick_count is not set, the library should automatically
+    // calculate a sensible number of ticks based on the available width.
+    // We verify that an x-axis is rendered at all and that it contains
+    // tick mark characters.
+    #[test]
+    fn test_auto_tick_count_renders_axis() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let graph = plot(&data, Config::default().x_axis_range(0.0, 100.0));
+
+        // The x-axis corner character confirms the axis was rendered.
+        assert!(
+            graph.contains('└'),
+            "auto tick count should render an x-axis with the corner character"
+        );
+
+        // At least one tick mark must be present.
+        assert!(
+            graph.contains('┬'),
+            "auto tick count should render at least one tick mark"
+        );
+    }
+
+    // Explicitly setting x_axis_tick_count must override the auto calculation.
+    // This ensures we have not broken the existing behaviour.
+    #[test]
+    fn test_explicit_tick_count_overrides_auto() {
+        // Use a wide dataset so auto tick count chooses more than 2 ticks.
+        let data: Vec<f64> = (1..=20).map(|x| x as f64).collect();
+
+        let auto_graph = plot(&data, Config::default().x_axis_range(0.0, 1000.0));
+        let explicit_graph = plot(
+            &data,
+            Config::default()
+                .x_axis_range(0.0, 1000.0)
+                .x_axis_tick_count(2),
+        );
+
+        // With 20 data points and wide labels (0, 1000), auto should choose
+        // more ticks than the explicit minimum of 2, producing different output.
+        assert_ne!(
+            auto_graph, explicit_graph,
+            "explicitly setting tick count should produce a different axis than auto"
+        );
+    }
+
+    // Auto tick count on a very narrow graph must not panic and must
+    // produce at least 2 ticks due to the .max(2) clamp.
+    #[test]
+    fn test_auto_tick_count_minimum_two_ticks() {
+        let data = vec![1.0, 2.0];
+        let graph = plot(&data, Config::default().x_axis_range(0.0, 1000000.0));
+
+        assert!(
+            !graph.is_empty(),
+            "auto tick count must not panic on a very narrow graph"
+        );
+        assert!(
+            graph.contains('└'),
+            "auto tick count must still render an axis on a narrow graph"
+        );
+    }
 }

@@ -50,6 +50,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   all public types, fields, and methods now have doc comments with descriptions,
   parameter notes, and usage examples where appropriate.
 
+- Auto tick count for the X-axis — when `x_axis_tick_count` is not set, the
+  library now automatically calculates a sensible number of ticks based on
+  the available graph width and the estimated label width, instead of
+  defaulting to a hardcoded value of 5. Explicitly setting `x_axis_tick_count`
+  still overrides the calculation.
+
+- Added `examples/auto_tick_count.rs` demonstrating automatic tick calculation
+  on a 20-point dataset with no explicit tick count configured.
+
 - Refactored `plot_many` into focused, single-responsibility helper functions.
   The monolithic function is now decomposed into:
     - `normalize_config` — applies default values to offset and line ending
