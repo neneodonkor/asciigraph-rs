@@ -175,7 +175,7 @@ The raw data is rendered in the default color. The yellow series is the
 5-point moving average, showing the underlying trend with short-term noise
 smoothed out.
 
-### Auto tick count
+### Auto Tick Count
 
 When using the X-axis, you do not need to specify the number of ticks.
 If `x_axis_tick_count` is not set, the library automatically calculates
