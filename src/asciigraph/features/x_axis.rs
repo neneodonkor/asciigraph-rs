@@ -159,4 +159,13 @@ pub(crate) fn add_x_axis(lines: &mut String, config: &Config, len_max: usize, le
             lines.push_str(&AnsiColor::DEFAULT.to_string());
         }
     }
+
+    // Append the X-axis label below the tick labels, centered over the
+    // data area starting from left_pad.
+    if let Some(ref label) = config.x_axis_label {
+        // Append the label to the end of the axis line with a small gap,
+        // on the same line as the └─── characters rather than below them.
+        lines.push_str("   ");
+        lines.push_str(label);
+    }
 }

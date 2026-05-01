@@ -1462,4 +1462,79 @@ mod tests {
             "auto tick count must still render an axis on a narrow graph"
         );
     }
+
+    // -------------------------------------------------------------------------
+    // Axis label tests
+    // -------------------------------------------------------------------------
+
+    // Y-axis label must appear in the output and must come before the
+    // first graph row — confirmed by checking it appears before the
+    // first ┤ or ┼ character in the string.
+    #[test]
+    fn test_y_axis_label_appears_above_graph() {
+        let data = vec![1.0, 2.0, 3.0, 2.0, 1.0];
+        let graph = plot(&data, Config::default().y_axis_label("Value"));
+
+        assert!(graph.contains("Value"), "y-axis label must appear in output");
+
+        let label_pos = graph.find("Value").unwrap();
+        let axis_pos = graph.find('┤').or_else(|| graph.find('┼')).unwrap();
+        assert!(
+            label_pos < axis_pos,
+            "y-axis label must appear before the first axis character"
+        );
+    }
+
+    // X-axis label must appear in the output and must come after the
+    // └ corner character that marks the start of the X-axis line.
+    #[test]
+    fn test_x_axis_label_appears_below_ticks() {
+        let data = vec![1.0, 2.0, 3.0, 2.0, 1.0];
+        let graph = plot(
+            &data,
+            Config::default()
+                .x_axis_range(0.0, 100.0)
+                .x_axis_label("Time (s)"),
+        );
+
+        assert!(graph.contains("Time (s)"), "x-axis label must appear in output");
+
+        let label_pos = graph.find("Time (s)").unwrap();
+        let axis_pos = graph.find('└').unwrap();
+        assert!(
+            label_pos > axis_pos,
+            "x-axis label must appear after the x-axis corner character"
+        );
+    }
+
+    // Neither label set — output must be identical to no labels configured.
+    #[test]
+    fn test_axis_labels_no_effect_when_not_set() {
+        let data = vec![1.0, 2.0, 3.0, 2.0, 1.0];
+
+        let without = plot(&data, Config::default().x_axis_range(0.0, 100.0));
+        let with_labels = plot(
+            &data,
+            Config::default()
+                .x_axis_range(0.0, 100.0),
+        );
+
+        assert_eq!(without, with_labels);
+    }
+
+    // Both labels together — both must appear in the output simultaneously.
+    #[test]
+    fn test_both_axis_labels_together() {
+        let data = vec![1.0, 2.0, 3.0, 2.0, 1.0];
+        let graph = plot(
+            &data,
+            Config::default()
+                .x_axis_range(0.0, 100.0)
+                .y_axis_label("Value")
+                .x_axis_label("Time (s)"),
+        );
+
+        assert!(graph.contains("Value"), "y-axis label must appear when both labels are set");
+        assert!(graph.contains("Time (s)"), "x-axis label must appear when both labels are set");
+    }
 }

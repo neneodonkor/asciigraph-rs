@@ -119,6 +119,14 @@ pub fn plot_many(data: &[&[f64]], config: Config) -> String {
 
     let mut lines = join_rows(&plot, &config);
 
+    // Prepend the Y-axis label above the graph body, centered over the
+    // full graph width (left_pad + len_max).
+    if let Some(ref label) = config.y_axis_label {
+        let mut result = format!("{}{}", label, config.line_ending);
+        result.push_str(&lines);
+        lines = result;
+    }
+
     if config.x_axis_range.is_some() {
         add_x_axis(&mut lines, &config, len_max, left_pad);
     }

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] – UNDER DEVELOPMENT
+
+### Added
+- X and Y axis labels via `Config::x_axis_label()` and `Config::y_axis_label()`.
+  The Y-axis label renders flush left above the graph body. The X-axis label
+  renders inline on the same row as the axis line, to the right of the tick
+  marks. The X-axis label only appears when `x_axis_range` is also configured.
+
+- Added `examples/axis_labels.rs` demonstrating both labels on a 20-point
+  dataset with a configured X-axis range.
+
+[0.1.5]: https://github.com/neneodonkor/asciigraph-rs/compare/v0.1.4...v0.1.5
+
 ## [0.1.4] – 2026-05-01
 
 ### Added

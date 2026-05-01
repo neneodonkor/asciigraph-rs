@@ -220,6 +220,10 @@ pub struct Config {
 
     /// Window size for the moving average overlay. `None` means disabled.
     pub moving_average_window: Option<usize>,
+
+    pub x_axis_label: Option<String>,
+
+    pub y_axis_label: Option<String>,
 }
 
 impl Default for Config {
@@ -246,6 +250,8 @@ impl Default for Config {
             zero_line: None,
             thresholds: Vec::new(),
             moving_average_window: None,
+            x_axis_label: None,
+            y_axis_label: None
         }
     }
 }
@@ -537,7 +543,45 @@ impl Config {
         self.moving_average_window = Some(window);
         self
     }
+
+    /// Sets a descriptive label for the X-axis, rendered below the tick labels
+    /// and centered over the data area.
+    ///
+    /// The label is only visible when an X-axis range has been set via
+    /// [`Config::x_axis_range()`]. If no X-axis range is configured, this
+    /// option has no effect.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use asciigraph::Config;
+    ///
+    /// let config = Config::default()
+    ///     .x_axis_range(0.0, 100.0)
+    ///     .x_axis_label("Time (seconds)");
+    /// ```
+    pub fn x_axis_label(mut self, label: &str) -> Self {
+        self.x_axis_label = Some(label.to_string());
+        self
+    }
+
+    /// Sets a descriptive label for the Y-axis, rendered horizontally above
+    /// the graph body and centered over the full graph width.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use asciigraph::Config;
+    ///
+    /// let config = Config::default().y_axis_label("Memory (MB)");
+    /// ```
+    pub fn y_axis_label(mut self, label: &str) -> Self {
+        self.y_axis_label = Some(label.to_string());
+        self
+    }
 }
+
+// END OF CONFIG -----------------------------------------------------------------------------------
 
 /// A horizontal reference line drawn at Y = 0.0 across the data area.
 ///

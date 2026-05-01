@@ -6,7 +6,7 @@ This document covers all configuration options and features available in
 All features are configured through the `Config` builder — start with
 `Config::default()` and chain the methods for the options you want.
 
-### Zero-line highlighting
+### Zero-line Highlighting
 
 Opt in to a horizontal reference line at Y = 0.0 by passing a `ZeroLine` value
 to `Config::zero_line()`. The line is only rendered when the data range straddles
@@ -60,7 +60,7 @@ fn main() {
 }
 ````
 
-### Threshold lines
+### Threshold Lines
 
 Add one or more horizontal reference lines at user-specified Y values using
 `Config::threshold()`. Each threshold is rendered as a dashed line (`╌`) and
@@ -130,7 +130,7 @@ Running this example renders the following graph:
 Thresholds outside the visible Y range are silently ignored. Series arc
 characters always render on top of threshold lines where they overlap.
 
-### Moving average overlay
+### Moving Average Overlay
 
 Add a smoothed trend line on top of your data using `Config::moving_average()`.
 The moving average is computed over a sliding window and rendered as an
@@ -226,3 +226,48 @@ Running this example renders the following graph:
 
 You can still override the automatic calculation by calling
 `x_axis_tick_count()` explicitly when you need precise control.
+
+### X and Y Axis Labels
+
+Add descriptive labels to your axes using `Config::y_axis_label()` and
+`Config::x_axis_label()`. The Y-axis label renders flush left above the
+graph body. The X-axis label renders inline on the same row as the axis
+line, to the right of the tick marks. Note that `x_axis_label` only
+appears when `x_axis_range` is also configured.
+
+```rust
+use asciigraph::{plot, Config};
+
+fn main() {
+    let data = vec![
+        3.0, 1.0, 5.0, 2.0, 8.0, 4.0, 7.0, 2.0, 6.0, 3.0,
+        9.0, 4.0, 6.0, 2.0, 7.0, 3.0, 8.0, 1.0, 5.0, 3.0,
+    ];
+
+    let graph = plot(
+        &data,
+        Config::default()
+            .x_axis_range(0.0, 100.0)
+            .y_axis_label("Memory (MB)")
+            .x_axis_label("Time (seconds)"),
+    );
+
+    println!("{}", graph);
+}
+```
+Running this example renders the following graph:
+
+```
+ Memory (MB)
+ 9.00 ┤         ╭╮
+ 8.00 ┤   ╭╮    ││    ╭╮
+ 7.00 ┤   ││╭╮  ││  ╭╮││
+ 6.00 ┤   ││││╭╮││╭╮││││
+ 5.00 ┤ ╭╮││││││││││││││╭╮
+ 4.00 ┤ │││╰╯││││╰╯│││││││
+ 3.00 ┼╮│││  ││╰╯  ││╰╯││╰
+ 2.00 ┤││╰╯  ╰╯    ╰╯  ││
+ 1.00 ┤╰╯              ╰╯
+      └┬───┬───┬──┬───┬───┬
+      0  20  40 60  80  100   Time (seconds)
+```
