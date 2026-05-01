@@ -251,8 +251,7 @@ fn main() {
 ```
 
 For a full list of features including zero-line highlighting, threshold lines,
-moving average overlay, X-axis configuration, and many more features, see [FEATURES.md](FEATURES.
-md).
+moving average overlay, X-axis configuration, and many more features, see [FEATURES.md](FEATURES.md).
 
 ## CLI Installation
 
