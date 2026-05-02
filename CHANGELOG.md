@@ -25,6 +25,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `examples/serde_config.rs` demonstrating serialization and
   deserialization of `Config` to and from JSON using `serde_json`.
 
+- Statistical annotations via `StatAnnotations` — opt-in horizontal reference
+  lines computed automatically from the data and rendered with inline labels.
+  Supports minimum, maximum, mean, median, and standard deviation (rendered
+  as two lines at ±σ). Each annotation uses a distinct dashed character for
+  visual clarity. When two annotation values map to the same grid row, their
+  labels are stacked and separated by a comma. In multi-series graphs, the
+  target series is configurable via `series_index`. Enabled through
+  `Config::stat_annotations()`.
+
+- Added `examples/stat_annotations.rs` demonstrating all five annotations
+  rendered in yellow over a 20-point dataset.
+
+### Changed
+- `Threshold` now supports `series_index` — each threshold is associated
+  with a specific series and two rules are applied before rendering. The
+  visibility rule skips a threshold if its value falls outside the min/max
+  range of its associated series specifically, not just the global graph
+  range. The color inheritance rule automatically applies the associated
+  series' color to the threshold line when no explicit color is set, creating
+  a natural visual association between a threshold and its series. Both rules
+  default gracefully — `series_index` defaults to `0` and an explicit color
+  always takes priority over the inherited series color.
+
+- Updated `examples/threshold.rs` to demonstrate both single-series and
+  multi-series threshold usage, including the visibility rule and color
+  inheritance rule.
+
 [0.1.5]: https://github.com/neneodonkor/asciigraph-rs/compare/v0.1.4...v0.1.5
 
 ## [0.1.4] – 2026-05-01

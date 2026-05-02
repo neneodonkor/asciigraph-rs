@@ -64,8 +64,21 @@ fn main() {
 
 Add one or more horizontal reference lines at user-specified Y values using
 `Config::threshold()`. Each threshold is rendered as a dashed line (`╌`) and
-carries its own color independently. Call `.threshold()` multiple times to add
-more than one line.
+is associated with a specific data series via `series_index`, which defaults
+to `0` (the first series). Call `.threshold()` multiple times to add more
+than one line.
+
+Two rules are applied before a threshold is drawn. The **visibility rule**
+ensures the threshold value falls within the min/max range of its associated
+series specifically — not just the global graph range. This means a threshold
+that is meaningful for one series will not appear as a spurious line when
+another series happens to cover that value range. The **color inheritance
+rule** automatically applies the associated series' color to the threshold
+line when no explicit color is set, creating a natural visual association
+between a threshold and the line it annotates. An explicitly set color always
+takes priority over the inherited series color.
+
+#### Single series
 
 ```rust
 use asciigraph::{plot, Config, Threshold, AnsiColor};
@@ -127,8 +140,74 @@ Running this example renders the following graph:
  60.00 ┼╯                 ╰
 ```
 
-Thresholds outside the visible Y range are silently ignored. Series arc
-characters always render on top of threshold lines where they overlap.
+#### Multi-series with visibility and color inheritance
+
+In a multi-series graph, each threshold can be targeted at a specific series.
+The threshold at 80.0 is associated with series 0 and inherits its BLUE color
+automatically. The threshold at 75.0 is associated with series 1 and inherits
+GREEN. The third threshold at 95.0 targeting series 1 is silently skipped
+because 95.0 exceeds series 1's maximum value of 86.0.
+
+```rust
+use asciigraph::{plot_many, Config, Threshold, AnsiColor};
+
+fn main() {
+    let s1 = vec![65.0, 70.0, 78.0, 85.0, 91.0, 88.0, 82.0, 76.0];
+    let s2 = vec![72.0, 68.0, 74.0, 80.0, 86.0, 83.0, 77.0, 71.0];
+
+    let graph = plot_many(
+        &[&s1, &s2],
+        Config::default()
+            .series_colors(&[AnsiColor::BLUE, AnsiColor::GREEN])
+            // Inherits BLUE from series 0.
+            .threshold(Threshold { series_index: 0, ..Threshold::new(80.0) })
+            // Inherits GREEN from series 1.
+            .threshold(Threshold { series_index: 1, ..Threshold::new(75.0) })
+            // Skipped — 95.0 is outside series 1's range of 68–86.
+            .threshold(Threshold { series_index: 1, ..Threshold::new(95.0) }),
+    );
+
+    println!("{}", graph);
+}
+```
+
+Running this example renders the following graph:
+
+```
+ 91.00 ┤   ╭╮
+ 90.00 ┤   ││
+ 89.00 ┤   ││
+ 88.00 ┤   │╰╮
+ 87.00 ┤   │ │
+ 86.00 ┤   ╭╮│
+ 85.00 ┤  ╭│││
+ 84.00 ┤  ││││
+ 83.00 ┤  ││╰╮
+ 82.00 ┤  ││ │╮
+ 81.00 ┤  ││ ││
+ 80.00 ┤╌╌╭╯╌││╌
+ 79.00 ┤  │  ││
+ 78.00 ┤ ╭│  ││
+ 77.00 ┤ ││  ╰╮
+ 76.00 ┤ ││   │
+ 75.00 ┤╌││╌╌╌│╌
+ 74.00 ┤ ╭╯   │
+ 73.00 ┤ │    │
+ 72.00 ┼╮│    │
+ 71.00 ┤││    ╰
+ 70.00 ┤││
+ 69.00 ┤││
+ 68.00 ┤╰╯
+ 67.00 ┤│
+ 66.00 ┤│
+ 65.00 ┼╯
+```
+
+Series arc characters always render on top of threshold lines where they
+overlap. A threshold whose value falls outside its associated series' range
+is silently skipped regardless of whether it falls within the global graph
+range.
+
 
 ### Moving Average Overlay
 
@@ -295,3 +374,82 @@ fn main() {
 Note that formatter closure fields (`x_axis_value_formatter` and
 `y_axis_value_formatter`) are skipped during serialization and restored
 as `None` on deserialization. All other fields roundtrip faithfully.
+
+### Statistical Annotations
+
+Add automatically computed reference lines to your graph using
+`Config::stat_annotations()`. The library computes the minimum, maximum,
+mean, median, and standard deviation directly from your data — no manual
+calculation required. Each annotation is rendered as a horizontal line
+using a distinct dashed character, with an inline label showing the
+statistic name and its computed value.
+
+Each annotation type uses a different line character so they are visually
+distinguishable at a glance: minimum and maximum use `╌`, mean uses `┄`,
+median uses `╍`, and standard deviation renders as two dotted lines (`·`)
+at one standard deviation above and below the mean, labeled `+σ` and `-σ`.
+When two annotation values are close enough to map to the same grid row,
+their labels are stacked on that row and separated by a comma.
+
+In a multi-series graph, set `series_index` on the `StatAnnotations` struct
+to control which series the statistics are computed from. The default is `0`,
+which targets the first series.
+
+```rust
+use asciigraph::{plot, Config, StatAnnotations, AnsiColor};
+
+fn main() {
+    let data = vec![
+        3.0, 1.0, 5.0, 2.0, 8.0, 4.0, 7.0, 2.0, 6.0, 3.0,
+        9.0, 4.0, 6.0, 2.0, 7.0, 3.0, 8.0, 1.0, 5.0, 3.0,
+    ];
+
+    let graph = plot(
+        &data,
+        Config::default()
+            .stat_annotations(StatAnnotations::with_color(AnsiColor::YELLOW)),
+    );
+
+    println!("{}", graph);
+}
+```
+
+Running this example renders the following graph:
+
+```
+ 9.00 ┤╌╌╌╌╌╌╌╌╌╭╮╌╌╌╌╌╌╌╌  max 9.00
+ 8.00 ┤   ╭╮    ││    ╭╮
+ 7.00 ┤···││╭╮··││··╭╮││··  +σ 6.85
+ 6.00 ┤   ││││╭╮││╭╮││││
+ 5.00 ┤ ╭╮││││││││││││││╭╮
+ 4.00 ┤┄│││╰╯││││╰╯│││││││  mean 4.45, med 4.00
+ 3.00 ┼╮│││  ││╰╯  ││╰╯││╰
+ 2.00 ┤││╰╯··╰╯····╰╯··││·  -σ 2.05
+ 1.00 ┤╰╯╌╌╌╌╌╌╌╌╌╌╌╌╌╌╰╯╌  min 1.00
+```
+
+To annotate only specific statistics, use struct literal syntax to set
+individual flags:
+
+```rust
+use asciigraph::{StatAnnotations, AnsiColor};
+
+fn main() {
+    // Show only min and max in red.
+    let annotations = StatAnnotations {
+        show_min:     true,
+        show_max:     true,
+        show_mean:    false,
+        show_median:  false,
+        show_std_dev: false,
+        series_index: 0,
+        color:        AnsiColor::RED,
+    };
+
+    // Annotate the second series in a multi-series graph.
+    let annotations = StatAnnotations {
+        series_index: 1,
+        ..StatAnnotations::new()
+    };
+}
+```

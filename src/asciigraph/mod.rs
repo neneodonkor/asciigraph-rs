@@ -3,6 +3,7 @@ mod features;
 use features::zero_line::render_zero_line;
 use features::threshold::render_thresholds;
 use features::x_axis::add_x_axis;
+use features::stat_annotations::render_stat_annotations;
 
 use crate::legend::add_legends;
 use crate::options::{CharSet, Config, DEFAULT_CHAR_SET};
@@ -112,7 +113,18 @@ pub fn plot_many(data: &[&[f64]], config: Config) -> String {
     }
 
     if !config.thresholds.is_empty() {
-        render_thresholds(&mut plot, &bounds, config.offset, &config.thresholds);
+        render_thresholds(
+            &mut plot,
+            &data,
+            &bounds,
+            config.offset,
+            &config.thresholds,
+            &config.series_colors,
+        );
+    }
+
+    if let Some(ref sa) = config.stat_annotations {
+        render_stat_annotations(&mut plot, &data, &bounds, config.offset, sa);
     }
 
     render_series(&mut plot, &data, &bounds, len_max, &config);

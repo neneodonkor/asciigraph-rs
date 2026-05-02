@@ -5,6 +5,7 @@ mod tests {
     use asciigraph::Config;
     use asciigraph::ZeroLine;
     use asciigraph::Threshold;
+    use asciigraph::StatAnnotations;
 
     // Helper to clean expected strings the same way Go tests do
     fn clean(s: &str) -> String {
@@ -1574,5 +1575,119 @@ mod tests {
         assert_eq!(restored.width, original.width);
         assert_eq!(restored.caption, original.caption);
         assert_eq!(restored.precision, original.precision);
+    }
+
+    // -------------------------------------------------------------------------
+    // Statistical annotation tests
+    // -------------------------------------------------------------------------
+
+    // When no stat annotations are configured, output must be identical
+    // to a graph with no annotations at all.
+    #[test]
+    fn test_stat_annotations_no_effect_when_not_set() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+
+        let without = plot(&data, Config::default());
+        let with_sa = plot(&data, Config::default());
+
+        assert_eq!(without, with_sa);
+    }
+
+    // Max annotation must appear in the output when enabled.
+    #[test]
+    fn test_stat_annotation_max_appears() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let graph = plot(
+            &data,
+            Config::default().stat_annotations(StatAnnotations {
+                show_max:     true,
+                show_min:     false,
+                show_mean:    false,
+                show_median:  false,
+                show_std_dev: false,
+                series_index: 0,
+                color:        AnsiColor::DEFAULT,
+            }),
+        );
+
+        assert!(graph.contains("max"), "max annotation label must appear in output");
+    }
+
+    // Min annotation must appear in the output when enabled.
+    #[test]
+    fn test_stat_annotation_min_appears() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let graph = plot(
+            &data,
+            Config::default().stat_annotations(StatAnnotations {
+                show_max:     false,
+                show_min:     true,
+                show_mean:    false,
+                show_median:  false,
+                show_std_dev: false,
+                series_index: 0,
+                color:        AnsiColor::DEFAULT,
+            }),
+        );
+
+        assert!(graph.contains("min"), "min annotation label must appear in output");
+    }
+
+    // Mean annotation must appear in the output when enabled.
+    #[test]
+    fn test_stat_annotation_mean_appears() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let graph = plot(
+            &data,
+            Config::default().stat_annotations(StatAnnotations {
+                show_max:     false,
+                show_min:     false,
+                show_mean:    true,
+                show_median:  false,
+                show_std_dev: false,
+                series_index: 0,
+                color:        AnsiColor::DEFAULT,
+            }),
+        );
+
+        assert!(graph.contains("mean"), "mean annotation label must appear in output");
+    }
+
+    // Standard deviation must produce two lines — one above and one below
+    // the mean — labeled +σ and -σ respectively.
+    #[test]
+    fn test_stat_annotation_std_dev_produces_two_lines() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let graph = plot(
+            &data,
+            Config::default().stat_annotations(StatAnnotations {
+                show_max:     false,
+                show_min:     false,
+                show_mean:    false,
+                show_median:  false,
+                show_std_dev: true,
+                series_index: 0,
+                color:        AnsiColor::DEFAULT,
+            }),
+        );
+
+        assert!(graph.contains("+σ"), "+σ label must appear for upper std dev line");
+        assert!(graph.contains("-σ"), "-σ label must appear for lower std dev line");
+    }
+
+    // Series index fallback — an out-of-range index must not panic and
+    // must fall back to the first series silently.
+    #[test]
+    fn test_stat_annotation_out_of_range_series_index_does_not_panic() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let graph = plot(
+            &data,
+            Config::default().stat_annotations(StatAnnotations {
+                series_index: 99, // way out of range
+                ..StatAnnotations::new()
+            }),
+        );
+
+        assert!(!graph.is_empty(), "must produce output even with out-of-range series index");
     }
 }

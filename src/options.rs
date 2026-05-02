@@ -62,39 +62,54 @@ pub struct CharSet {
 
     /// Dashed horizontal character used for threshold lines. Default: `╌`
     pub dash_horizontal: char,
+
+    /// Dashed horizontal character used for mean annotation. Default: ┄
+    pub double_dash_horizontal: char,
+
+    /// Heavy dashed horizontal character used for median annotation. Default: ╍
+    pub heavy_dash_horizontal: char,
+
+    /// Dotted horizontal character used for standard deviation annotation. Default: ·
+    pub dot_horizontal: char,
 }
 
 impl Default for CharSet {
     fn default() -> Self {
         CharSet {
-            horizontal:      DEFAULT_CHAR_SET.horizontal,
-            vertical_line:   DEFAULT_CHAR_SET.vertical_line,
-            arc_down_right:  DEFAULT_CHAR_SET.arc_down_right,
-            arc_down_left:   DEFAULT_CHAR_SET.arc_down_left,
-            arc_up_right:    DEFAULT_CHAR_SET.arc_up_right,
-            arc_up_left:     DEFAULT_CHAR_SET.arc_up_left,
-            end_cap:         DEFAULT_CHAR_SET.end_cap,
-            start_cap:       DEFAULT_CHAR_SET.start_cap,
-            up_right:        DEFAULT_CHAR_SET.up_right,
-            down_horizontal: DEFAULT_CHAR_SET.down_horizontal,
-            dash_horizontal: DEFAULT_CHAR_SET.dash_horizontal,
+            horizontal:             DEFAULT_CHAR_SET.horizontal,
+            vertical_line:          DEFAULT_CHAR_SET.vertical_line,
+            arc_down_right:         DEFAULT_CHAR_SET.arc_down_right,
+            arc_down_left:          DEFAULT_CHAR_SET.arc_down_left,
+            arc_up_right:           DEFAULT_CHAR_SET.arc_up_right,
+            arc_up_left:            DEFAULT_CHAR_SET.arc_up_left,
+            end_cap:                DEFAULT_CHAR_SET.end_cap,
+            start_cap:              DEFAULT_CHAR_SET.start_cap,
+            up_right:               DEFAULT_CHAR_SET.up_right,
+            down_horizontal:        DEFAULT_CHAR_SET.down_horizontal,
+            dash_horizontal:        DEFAULT_CHAR_SET.dash_horizontal,
+            double_dash_horizontal: DEFAULT_CHAR_SET.double_dash_horizontal,
+            heavy_dash_horizontal:  DEFAULT_CHAR_SET.heavy_dash_horizontal,
+            dot_horizontal:         DEFAULT_CHAR_SET.dot_horizontal,
         }
     }
 }
 
 /// The default box-drawing character set used when no custom [`CharSet`] is provided.
 pub const DEFAULT_CHAR_SET: CharSet = CharSet {
-    horizontal:      '─',
-    vertical_line:   '│',
-    arc_down_right:  '╭',
-    arc_down_left:   '╮',
-    arc_up_right:    '╰',
-    arc_up_left:     '╯',
-    end_cap:         '╴',
-    start_cap:       '╶',
-    up_right:        '└',
-    down_horizontal: '┬',
-    dash_horizontal: '╌',
+    horizontal:             '─',
+    vertical_line:          '│',
+    arc_down_right:         '╭',
+    arc_down_left:          '╮',
+    arc_up_right:           '╰',
+    arc_up_left:            '╯',
+    end_cap:                '╴',
+    start_cap:              '╶',
+    up_right:               '└',
+    down_horizontal:        '┬',
+    dash_horizontal:        '╌',
+    double_dash_horizontal: '┄',
+    heavy_dash_horizontal:  '╍',
+    dot_horizontal:         '·',
 };
 
 /// Creates a [`CharSet`] where every character is set to the same value.
@@ -113,17 +128,20 @@ pub const DEFAULT_CHAR_SET: CharSet = CharSet {
 /// ```
 pub fn create_char_set(character: char) -> CharSet {
     CharSet {
-        horizontal:      character,
-        vertical_line:   character,
-        arc_down_right:  character,
-        arc_down_left:   character,
-        arc_up_right:    character,
-        arc_up_left:     character,
-        end_cap:         character,
-        start_cap:       character,
-        up_right:        character,
-        down_horizontal: character,
-        dash_horizontal: character,
+        horizontal:             character,
+        vertical_line:          character,
+        arc_down_right:         character,
+        arc_down_left:          character,
+        arc_up_right:           character,
+        arc_up_left:            character,
+        end_cap:                character,
+        start_cap:              character,
+        up_right:               character,
+        down_horizontal:        character,
+        dash_horizontal:        character,
+        double_dash_horizontal: character,
+        heavy_dash_horizontal:  character,
+        dot_horizontal:         character,
     }
 }
 
@@ -226,9 +244,19 @@ pub struct Config {
     /// Window size for the moving average overlay. `None` means disabled.
     pub moving_average_window: Option<usize>,
 
+    /// Descriptive label rendered flush left above the graph body.
+    /// Set via [`Config::y_axis_label()`].
+    pub y_axis_label: Option<String>,
+
+    /// Descriptive label rendered inline on the same row as the X-axis line,
+    /// to the right of the tick marks. Only visible when [`Config::x_axis_range()`]
+    /// is also configured. Set via [`Config::x_axis_label()`].
     pub x_axis_label: Option<String>,
 
-    pub y_axis_label: Option<String>,
+    /// Optional statistical annotations rendered as horizontal reference lines
+    /// at computed values — minimum, maximum, mean, median, and standard deviation.
+    /// Set via [`Config::stat_annotations()`].
+    pub stat_annotations: Option<StatAnnotations>,
 }
 
 impl Default for Config {
@@ -256,7 +284,8 @@ impl Default for Config {
             thresholds: Vec::new(),
             moving_average_window: None,
             x_axis_label: None,
-            y_axis_label: None
+            y_axis_label: None,
+            stat_annotations: None,
         }
     }
 }
@@ -310,7 +339,7 @@ impl Config {
 
     /// Sets the number of decimal places used in Y-axis labels.
     ///
-    /// When not set, the library auto-detects an appropriate precision based
+    /// When not set, the library auto-detects appropriate precision based
     /// on the data range — more decimal places for small values, fewer for
     /// large ones.
     pub fn precision(mut self, p: usize) -> Self {
@@ -365,7 +394,7 @@ impl Config {
         self
     }
 
-    /// Sets the line ending sequence used between rows.
+    /// Sets the line-ending sequence used between rows.
     ///
     /// Defaults to `"\n"`. Use `"\r\n"` for Windows raw terminals or any
     /// environment that requires CRLF line endings.
@@ -394,7 +423,7 @@ impl Config {
     /// the number of ticks — for example, to match a specific grid or to reduce
     /// clutter on a narrow graph.
     ///
-    /// The minimum accepted value is `2`. Values below `2` are ignored and the
+    /// The minimum accepted value is `2`. Values below `2` are ignored, and the
     /// automatic calculation is used instead.
     ///
     /// Only takes effect when an X-axis range has been set via
@@ -584,6 +613,35 @@ impl Config {
         self.y_axis_label = Some(label.to_string());
         self
     }
+
+    /// Enables statistical annotations rendered as horizontal reference lines
+    /// at computed values across the data area.
+    ///
+    /// The annotations are derived automatically from the data — no manual
+    /// value calculation is required. Each annotation is individually opt-in
+    /// through the boolean flags on [`StatAnnotations`]. Use
+    /// [`StatAnnotations::new()`] to enable all five at once, or construct
+    /// a custom [`StatAnnotations`] to enable only specific ones.
+    ///
+    /// Annotations are rendered before the series, so series arc characters
+    /// always appear on top.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use asciigraph::{plot, Config, StatAnnotations, AnsiColor};
+    ///
+    /// let data = vec![3.0, 1.0, 4.0, 1.0, 5.0, 9.0, 2.0, 6.0];
+    /// let graph = plot(
+    ///     &data,
+    ///     Config::default()
+    ///         .stat_annotations(StatAnnotations::with_color(AnsiColor::YELLOW)),
+    /// );
+    /// ```
+    pub fn stat_annotations(mut self, sa: StatAnnotations) -> Self {
+        self.stat_annotations = Some(sa);
+        self
+    }
 }
 
 // END OF CONFIG -----------------------------------------------------------------------------------
@@ -645,33 +703,54 @@ impl Default for ZeroLine {
     }
 }
 
-/// A horizontal reference line drawn at a user-specified Y value.
+/// A horizontal reference line drawn at a user-specified Y value,
+/// associated with a specific data series.
 ///
 /// Threshold lines are rendered as dashed lines (`╌`) across the data area
 /// at the given value, making limits, targets, or alert boundaries immediately
 /// visible on the graph. Multiple thresholds can be added to a single graph
 /// by calling [`Config::threshold()`] repeatedly.
 ///
-/// Each threshold carries its own value, color, and character independently,
-/// so you can use different colors to distinguish warning and critical levels.
+/// Each threshold is associated with a series via `series_index`, which
+/// defaults to `0` (the first series). Two rules are applied before a
+/// threshold is drawn:
 ///
-/// A threshold is only rendered if its value falls within the visible Y range
-/// of the graph. If the value is above the maximum or below the minimum, it
-/// is silently skipped.
+/// **Visibility rule** — the threshold value must fall within the min/max
+/// range of its associated series specifically, not just the global graph
+/// range. This means a threshold at Y = 80.0 associated with a series whose
+/// values only reach 40.0 will be silently skipped, even if another series
+/// on the same graph reaches 90.0. This prevents thresholds from cluttering
+/// a graph when they are not meaningful for their associated series.
 ///
-/// Series arc characters always render on top of threshold lines.
+/// **Color inheritance rule** — when no explicit color is set on the
+/// threshold (i.e. `color` is [`AnsiColor::DEFAULT`]), the threshold
+/// automatically inherits the color of its associated series from
+/// `Config::series_colors`. This creates a natural visual association
+/// between a threshold line and the series it belongs to. An explicitly
+/// set color always takes priority over the inherited series color.
+///
+/// Series arc characters always render on top of threshold lines where
+/// they overlap.
 ///
 /// # Example
 ///
 /// ```rust
-/// use asciigraph::{plot, Config, Threshold, AnsiColor};
+/// use asciigraph::{plot_many, Config, Threshold, AnsiColor};
 ///
-/// let data = vec![60.0, 70.0, 85.0, 92.0, 78.0, 65.0];
-/// let graph = plot(
-///     &data,
+/// let s1 = vec![60.0, 75.0, 85.0, 92.0, 78.0, 65.0];
+/// let s2 = vec![10.0, 18.0, 25.0, 35.0, 28.0, 15.0];
+///
+/// let graph = plot_many(
+///     &[&s1, &s2],
 ///     Config::default()
-///         .threshold(Threshold::with_color(80.0, AnsiColor::YELLOW))
-///         .threshold(Threshold::with_color(90.0, AnsiColor::RED)),
+///         .series_colors(&[AnsiColor::BLUE, AnsiColor::GREEN])
+///         // Targets series 0 — inherits BLUE from series_colors.
+///         .threshold(Threshold::new(80.0))
+///         // Targets series 1 explicitly — overrides the inherited color.
+///         .threshold(Threshold {
+///             series_index: 1,
+///             ..Threshold::with_color(30.0, AnsiColor::RED)
+///         }),
 /// );
 /// println!("{}", graph);
 /// ```
@@ -688,6 +767,17 @@ pub struct Threshold {
     /// The character used to draw the threshold line.
     /// Defaults to `╌` ([`DEFAULT_CHAR_SET::dash_horizontal`]).
     pub character: char,
+
+    /// The index of the series this threshold is associated with.
+    ///
+    /// The threshold is only rendered if its value falls within the min/max
+    /// range of the series at this index. If the index is out of range or
+    /// the threshold value falls outside the series range, the threshold is
+    /// silently skipped. When no explicit color is set on the threshold, the
+    /// color of the associated series is inherited automatically.
+    ///
+    /// Defaults to `0`, which associates the threshold with the first series.
+    pub series_index: usize,
 }
 
 impl Threshold {
@@ -698,6 +788,7 @@ impl Threshold {
             value,
             color: AnsiColor::DEFAULT,
             character: DEFAULT_CHAR_SET.dash_horizontal,
+            series_index: 0
         }
     }
 
@@ -708,12 +799,184 @@ impl Threshold {
             value,
             color,
             character: DEFAULT_CHAR_SET.dash_horizontal,
+            series_index: 0
         }
     }
 
     /// Creates a threshold line at the given Y value with both a custom
     /// character and a custom ANSI color.
     pub fn with_char_and_color(value: f64, character: char, color: AnsiColor) -> Self {
-        Threshold { value, color, character }
+        Threshold { value, color, character, series_index: 0 }
+    }
+}
+
+
+/// Opt-in statistical annotations rendered as horizontal reference lines
+/// at computed values across the data area.
+///
+/// The library computes each statistic from the data automatically — no
+/// manual calculation is required. Each annotation is individually
+/// controlled by a boolean flag, so you can display any combination of
+/// minimum, maximum, mean, median, and standard deviation.
+///
+/// By default, statistics are computed from the first series (`series_index
+/// = 0`). In a multi-series graph, set `series_index` to the index of the
+/// series you want to annotate. If the index is out of range, the function
+/// falls back to the first series silently.
+///
+/// Use [`StatAnnotations::new()`] to enable all five annotations at once,
+/// or set individual flags to `false` to disable specific ones. All
+/// annotations share a single color configured on the struct.
+///
+/// Annotations are rendered before the series, so series arc characters
+/// always appear on top where they overlap.
+///
+/// # Example
+///
+/// ```rust
+/// use asciigraph::{plot, Config, StatAnnotations, AnsiColor};
+///
+/// let data = vec![3.0, 1.0, 4.0, 1.0, 5.0, 9.0, 2.0, 6.0];
+///
+/// // Enable all annotations with no color.
+/// let graph = plot(&data, Config::default().stat_annotations(StatAnnotations::new()));
+///
+/// // Enable only min and max in red.
+/// let graph = plot(
+///     &data,
+///     Config::default().stat_annotations(StatAnnotations {
+///         show_min: true,
+///         show_max: true,
+///         show_mean: false,
+///         show_median: false,
+///         show_std_dev: false,
+///         series_index: 0,
+///         color: AnsiColor::RED,
+///     }),
+/// );
+///
+/// // Annotate the second series in a multi-series graph.
+/// let graph = plot(
+///     &data,
+///     Config::default().stat_annotations(StatAnnotations {
+///         series_index: 1,
+///         ..StatAnnotations::new()
+///     }),
+/// );
+/// ```
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Clone, Copy)]
+pub struct StatAnnotations {
+    /// Draws a reference line at the minimum value of the dataset.
+    pub show_min: bool,
+
+    /// Draws a reference line at the maximum value of the dataset.
+    pub show_max: bool,
+
+    /// Draws a reference line at the mean (average) value of the dataset.
+    pub show_mean: bool,
+
+    /// Draws a reference line at the median value of the dataset.
+    pub show_median: bool,
+
+    /// Draws a reference line at one standard deviation above and below
+    /// the mean, giving a visual indication of the data's spread.
+    pub show_std_dev: bool,
+
+    /// The ANSI color used to render all annotation lines.
+    /// Defaults to [`AnsiColor::DEFAULT`] (no color).
+    pub color: AnsiColor,
+
+    /// The index of the series to compute statistics from.
+    ///
+    /// In a single-series graph this is always `0` and never needs to be
+    /// changed. In a multi-series graph, set this to the index of the series
+    /// you want to annotate — `0` for the first series, `1` for the second,
+    /// and so on.
+    ///
+    /// If the index is out of range (i.e. greater than the number of series),
+    /// the function falls back to the first series silently.
+    ///
+    /// To set this field without changing anything else, use struct update
+    /// syntax rather than a dedicated constructor:
+    ///
+    /// ```rust
+    /// use asciigraph::StatAnnotations;
+    ///
+    /// let annotations = StatAnnotations {
+    ///     series_index: 1, // annotate the second series
+    ///     ..StatAnnotations::new()
+    /// };
+    /// ```
+    pub series_index: usize,
+}
+
+impl StatAnnotations {
+/// Creates a `StatAnnotations` value with all five annotations enabled,
+/// no color, and targeting the first series (`series_index = 0`).
+///
+/// This is the simplest way to add statistical context to a graph —
+/// pass `StatAnnotations::new()` to [`Config::stat_annotations()`] and
+/// all five reference lines are drawn automatically from the first series.
+///
+/// For multi-series graphs where you want to annotate a series other
+/// than the first, use struct update syntax to override `series_index`:
+///
+/// ```rust
+/// use asciigraph::StatAnnotations;
+///
+/// let annotations = StatAnnotations {
+///     series_index: 2, // annotate the third series
+///     ..StatAnnotations::new()
+/// };
+/// ```
+pub fn new() -> Self {
+    StatAnnotations {
+        show_min:     true,
+        show_max:     true,
+        show_mean:    true,
+        show_median:  true,
+        show_std_dev: true,
+        color:        AnsiColor::DEFAULT,
+        series_index: 0,
+    }
+}
+
+/// Creates a `StatAnnotations` value with all five annotations enabled,
+/// rendered in a specific ANSI color, and targeting the first series
+/// (`series_index = 0`).
+///
+/// Use this when you want the annotation lines to stand out visually
+/// from the series line — for example, rendering the annotations in
+/// yellow against a default-colored series makes each reference line
+/// immediately obvious.
+///
+/// For multi-series graphs, override `series_index` using struct update
+/// syntax after calling this constructor:
+///
+/// ```rust
+/// use asciigraph::{StatAnnotations, AnsiColor};
+///
+/// let annotations = StatAnnotations {
+///     series_index: 1,
+///     ..StatAnnotations::with_color(AnsiColor::YELLOW)
+/// };
+/// ```
+pub fn with_color(color: AnsiColor) -> Self {
+    StatAnnotations {
+        show_min:     true,
+        show_max:     true,
+        show_mean:    true,
+        show_median:  true,
+        show_std_dev: true,
+        series_index: 0,
+        color,
+    }
+}
+}
+
+impl Default for StatAnnotations {
+    fn default() -> Self {
+        StatAnnotations::new()
     }
 }
