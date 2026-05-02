@@ -271,3 +271,27 @@ Running this example renders the following graph:
       └┬───┬───┬──┬───┬───┬
       0  20  40 60  80  100   Time (seconds)
 ```
+
+### Serde Support
+
+Enable the `serde` feature flag to serialize and deserialize `Config` and
+related types to and from any Serde-compatible format such as JSON or TOML.
+
+```toml
+# Cargo.toml
+asciigraph = { version = "0.1.5", features = ["serde"] }
+```
+
+```rust
+use asciigraph::Config;
+
+fn main() {
+    let config = Config::default().height(10).caption("My graph");
+    let json = serde_json::to_string_pretty(&config).unwrap();
+    let restored: Config = serde_json::from_str(&json).unwrap();
+}
+```
+
+Note that formatter closure fields (`x_axis_value_formatter` and
+`y_axis_value_formatter`) are skipped during serialization and restored
+as `None` on deserialization. All other fields roundtrip faithfully.

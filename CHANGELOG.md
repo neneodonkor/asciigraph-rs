@@ -16,6 +16,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `examples/axis_labels.rs` demonstrating both labels on a 20-point
   dataset with a configured X-axis range.
 
+- Serde support via an optional `serde` feature flag. Add
+  `asciigraph = { version = "0.1.5", features = ["serde"] }` to enable
+  `Serialize` and `Deserialize` for `Config`, `AnsiColor`, `CharSet`,
+  `ZeroLine`, and `Threshold`. Formatter closure fields are skipped during
+  serialization as functions cannot be represented as data.
+
+- Added `examples/serde_config.rs` demonstrating serialization and
+  deserialization of `Config` to and from JSON using `serde_json`.
+
 [0.1.5]: https://github.com/neneodonkor/asciigraph-rs/compare/v0.1.4...v0.1.5
 
 ## [0.1.4] – 2026-05-01

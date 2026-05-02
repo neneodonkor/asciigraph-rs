@@ -1537,4 +1537,42 @@ mod tests {
         assert!(graph.contains("Value"), "y-axis label must appear when both labels are set");
         assert!(graph.contains("Time (s)"), "x-axis label must appear when both labels are set");
     }
+
+    // -------------------------------------------------------------------------
+    // Serde tests (only compiled when the serde feature is enabled)
+    // -------------------------------------------------------------------------
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_config_serializes_to_json() {
+        let config = Config::default()
+            .height(10)
+            .width(20)
+            .caption("test graph")
+            .precision(2);
+
+        let json = serde_json::to_string(&config).expect("serialization must succeed");
+
+        assert!(json.contains("\"height\":10"), "height must be serialized");
+        assert!(json.contains("\"width\":20"), "width must be serialized");
+        assert!(json.contains("\"caption\":\"test graph\""), "caption must be serialized");
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_config_roundtrips_through_json() {
+        let original = Config::default()
+            .height(10)
+            .width(20)
+            .caption("test graph")
+            .precision(2);
+
+        let json = serde_json::to_string(&original).expect("serialization must succeed");
+        let restored: Config = serde_json::from_str(&json).expect("deserialization must succeed");
+
+        assert_eq!(restored.height, original.height);
+        assert_eq!(restored.width, original.width);
+        assert_eq!(restored.caption, original.caption);
+        assert_eq!(restored.precision, original.precision);
+    }
 }
