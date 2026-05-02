@@ -27,6 +27,7 @@ use crate::color::AnsiColor;
 ///     ..Default::default()
 /// };
 /// ```
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Debug, Clone)]
 pub struct CharSet {
     /// Horizontal line character used for flat segments. Default: `─`
@@ -146,6 +147,8 @@ pub fn create_char_set(character: char) -> CharSet {
 ///         .axis_color(AnsiColor::GREEN),
 /// );
 /// ```
+
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Config {
     /// Target width of the data area in columns. `0` means auto-size to the
     /// number of data points.
@@ -206,10 +209,12 @@ pub struct Config {
 
     /// Custom formatter for X-axis tick labels. Accepts any closure of the
     /// form `Fn(f64) -> String`.
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub x_axis_value_formatter: Option<Box<dyn Fn(f64) -> String>>,
 
     /// Custom formatter for Y-axis labels. Accepts any closure of the form
     /// `Fn(f64) -> String`.
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub y_axis_value_formatter: Option<Box<dyn Fn(f64) -> String>>,
 
     /// Optional zero line drawn at Y = 0.0 across the data area.
@@ -598,6 +603,7 @@ impl Config {
 /// let data = vec![-3.0, -1.0, 0.0, 1.0, 3.0];
 /// let graph = plot(&data, Config::default().zero_line(ZeroLine::new()));
 /// ```
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy)]
 pub struct ZeroLine {
     /// The ANSI color used to render the zero line.
@@ -669,6 +675,7 @@ impl Default for ZeroLine {
 /// );
 /// println!("{}", graph);
 /// ```
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[derive(Clone, Copy)]
 pub struct Threshold {
     /// The Y value at which the threshold line is drawn.

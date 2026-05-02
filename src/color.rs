@@ -5,6 +5,8 @@ use std::fmt::Formatter;
 use std::str::FromStr;
 
 // `#[repr(transparent)]` ensures that AnsiColor has the exact same memory layout as an u8, making it zero-cost to wrap
+
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(transparent)]
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AnsiColor(u8);
