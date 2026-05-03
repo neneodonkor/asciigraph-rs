@@ -3,6 +3,10 @@
 use std::string::ToString;
 use crate::color::AnsiColor;
 
+// ---------------------------------------------------------------------------
+// CharSet
+// ---------------------------------------------------------------------------
+
 /// Defines the set of characters used to draw a data series on the graph.
 ///
 /// Each field controls a specific part of the line rendering — horizontal
@@ -145,6 +149,10 @@ pub fn create_char_set(character: char) -> CharSet {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+
 /// Configuration for controlling the appearance and behavior of a graph.
 ///
 /// `Config` uses a builder pattern — start with [`Config::default()`] and
@@ -165,7 +173,6 @@ pub fn create_char_set(character: char) -> CharSet {
 ///         .axis_color(AnsiColor::GREEN),
 /// );
 /// ```
-
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Config {
     /// Target width of the data area in columns. `0` means auto-size to the
@@ -646,6 +653,10 @@ impl Config {
 
 // END OF CONFIG -----------------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// ZeroLine
+// ---------------------------------------------------------------------------
+
 /// A horizontal reference line drawn at Y = 0.0 across the data area.
 ///
 /// The zero line is only rendered when the data range straddles zero — if all
@@ -702,6 +713,10 @@ impl Default for ZeroLine {
         ZeroLine::new()
     }
 }
+
+// ---------------------------------------------------------------------------
+// Threshold
+// ---------------------------------------------------------------------------
 
 /// A horizontal reference line drawn at a user-specified Y value,
 /// associated with a specific data series.
@@ -810,6 +825,9 @@ impl Threshold {
     }
 }
 
+// ---------------------------------------------------------------------------
+// StatAnnotations
+// ---------------------------------------------------------------------------
 
 /// Opt-in statistical annotations rendered as horizontal reference lines
 /// at computed values across the data area.
