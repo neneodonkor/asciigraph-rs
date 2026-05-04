@@ -1,6 +1,6 @@
 // Config — the builder-pattern configuration struct for graph rendering.
 
-use crate::color::AnsiColor;
+use crate::colors::AnsiColor;
 use crate::options::charset::{CharSet};
 use crate::options::extensions::{ZeroLine, Threshold, StatAnnotations};
 

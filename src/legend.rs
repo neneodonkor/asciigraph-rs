@@ -1,6 +1,6 @@
 // Handle legend items
 
-use crate::color::AnsiColor;
+use crate::colors::AnsiColor;
 use crate::options::Config;
 
 /// Create legend item as a colored box and text

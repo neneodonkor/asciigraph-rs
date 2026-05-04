@@ -5,7 +5,7 @@
 // Y values. Keeping them together makes it easy to find and reason about
 // the annotation surface as a unit.
 
-use crate::color::AnsiColor;
+use crate::colors::AnsiColor;
 use crate::options::charset::DEFAULT_CHAR_SET;
 
 // ---------------------------------------------------------------------------
