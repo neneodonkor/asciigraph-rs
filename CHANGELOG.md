@@ -5,7 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.5] – 2026-05-03
+## [0.1.6] – UNDER DEVELOPMENT — Durian
+
+### Changed
+- Refactored `color.rs` to eliminate repetition using declarative macros. A
+  single `define_colors!` invocation now serves as the one source of truth for
+  all named color constants, generating both the `pub const` definitions and
+  the `FromStr` implementation automatically. This means adding or renaming a
+  color in the future requires editing exactly one place instead of two.
+
+- Replaced the `FromStr` string sanitization approach — which previously
+  allocated a new `String` on every call via `.to_lowercase().replace('_', "")`
+  — with a `const fn color_match` that compares byte slices directly, skipping
+  underscores and normalizing case with a bitwise operation. The result is
+  zero-allocation color name lookup with the same case-insensitive,
+  underscore-tolerant behavior as before.
+
+[0.1.6]: https://github.com/neneodonkor/asciigraph-rs/compare/v0.1.5...v0.1.6
+
+## [0.1.5] – 2026-05-03 — Guava
 
 ### Added
 - X and Y axis labels via `Config::x_axis_label()` and `Config::y_axis_label()`.
@@ -62,7 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.1.5]: https://github.com/neneodonkor/asciigraph-rs/compare/v0.1.4...v0.1.5
 
-## [0.1.4] – 2026-05-01
+## [0.1.4] – 2026-05-01 — Barberries
 
 ### Added
 - Zero-line highlighting via `ZeroLine` — an opt-in horizontal reference line
@@ -134,7 +152,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.1.4]: https://github.com/neneodonkor/asciigraph-rs/compare/v0.1.3...v0.1.4
 
-## [0.1.3] - 2026-04-29
+## [0.1.3] - 2026-04-29 — Tangerine
 
 ### Changed
 - Refactored `plot_many` in `asciigraph.rs` to be more idiomatic Rust
@@ -152,7 +170,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.1.3]: https://github.com/neneodonkor/asciigraph-rs/compare/v0.1.2...v0.1.3
 
-## [0.1.2] - 2026-04-28
+## [0.1.2] - 2026-04-28 — Peach
 
 ### Changed
 - Improved `color.rs` with more idiomatic Rust patterns. `AnsiColor` now implements the standard `FromStr` and `TryFrom<&str>` traits, meaning colors can be parsed using Rust's built-in `.parse::<AnsiColor>()` syntax in addition to the existing `get_ansi_color` method.
@@ -168,7 +186,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated crate description in `Cargo.toml`.
 
-## [0.1.0] - 2026-04-26
+## [0.1.0] - 2026-04-26 — Coconut
 
 ### Added
 - Initial release — a complete Rust port of [guptarohit/asciigraph](https://github.com/guptarohit/asciigraph) (Go v0.9.0).
