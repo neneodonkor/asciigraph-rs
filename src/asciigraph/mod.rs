@@ -211,7 +211,7 @@ fn prepare_data(data: &[&[f64]], config: &Config) -> (Vec<Vec<f64>>, usize) {
 
     // If a moving average window is configured, compute it from the first
     // series and append it as an additional series. It is computed after
-    // interpolation so the window applies to the final column count.
+    //  interpolation, so the window applies to the final column count.
     if let Some(window) = config.moving_average_window {
         if !data.is_empty() {
             let ma = utils::moving_average(&data[0], window);
@@ -313,7 +313,7 @@ fn init_grid(rows: usize, width: usize) -> Vec<Vec<Cell>> {
 /// Computes the number of decimal places to use for Y-axis labels.
 ///
 /// When `config.precision` is set explicitly, that value is used directly.
-/// Otherwise the library applies a heuristic: extra decimal places are added
+/// Otherwise, the library applies a heuristic: extra decimal places are added
 /// for very small values (to avoid losing meaningful digits), and large values
 /// default to zero decimal places (integers are sufficient).
 fn calculate_precision(maximum: f64, minimum: f64, config: &Config) -> usize {

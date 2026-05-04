@@ -115,7 +115,6 @@ macro_rules! __impl_from_str {
                     _ => {
                         $(
                             if color_match(s, stringify!($name)) {
-
                                 return Ok(AnsiColor::$name);
                             }
                         )*
