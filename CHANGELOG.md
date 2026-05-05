@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.6] – UNDER DEVELOPMENT — Durian
 
 ### Changed
+- Renamed file `color.rs` to `colors.rs`.
+
 - Refactored `color.rs` to eliminate repetition using declarative macros. A
   single `define_colors!` invocation now serves as the one source of truth for
   all named color constants, generating both the `pub const` definitions and
