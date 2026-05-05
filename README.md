@@ -4,10 +4,10 @@
 [![Docs.rs](https://docs.rs/asciigraph-rs/badge.svg)](https://docs.rs/asciigraph-rs)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
 
-Rust library to make lightweight ASCII line graphs ╭┈╯ in command line apps. This port is a complete and 
-faithful implementation of the Go original (version 0.9.0) [guptarohit/asciigraph]
-(https://github.com/guptarohit/asciigraph),
-supporting:
+Rust library to make lightweight ASCII line graphs ╭┈╯ in command line apps. 
+
+This repo started as a complete and faithful implementation of the Go version of asciigraph 
+(version 0.9.0) [guptarohit/asciigraph](https://github.com/guptarohit/asciigraph), supporting:
 
 - Single and multi-series plots
 - ANSI color support for series, axes, labels, and captions
