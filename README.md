@@ -36,7 +36,7 @@ Or manually add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-asciigraph-rs = "0.1.0"
+asciigraph-rs = "0.1.5"
 ```
 
 ## Usage
